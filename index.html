@@ -9,20 +9,24 @@
         *:active { cursor: url('glove_press_white_processed.png') 32 32, auto !important; }
         
         body { margin: 0; overflow: hidden; background-color: #79C265; font-family: 'Comic Sans MS', 'Jua', sans-serif; user-select: none; touch-action: none; }
-        #game-board { position: relative; width: 100vw; height: 100vh; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; overflow: hidden; }
         
-        #night-overlay { position: absolute; width: 100%; height: 100%; background: rgba(10,10,40,0.7); pointer-events: none; z-index: 15000; opacity: 0; transition: opacity 3s; mix-blend-mode: multiply; }
-
-        #volcano { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; background: url('volcano_processed.webp') no-repeat center/contain; cursor: pointer; z-index: 10; transition: transform 0.1s; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
+        #viewport { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+        
+        #game-board { position: absolute; width: 3000px; height: 3000px; transform-origin: 0 0; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 30px 30px; overflow: hidden; }
+        
+        #volcano { position: absolute; left: 1500px; top: 1500px; transform: translate(-50%, -50%); width: 150px; height: 150px; background: url('volcano_processed.webp') no-repeat center/contain; cursor: pointer; z-index: 10; transition: transform 0.1s; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
         #volcano:active { transform: translate(-50%, -50%) scale(0.95); }
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-55%, -45%) rotate(-5deg); } 50% { transform: translate(-45%, -55%) rotate(5deg); } 75% { transform: translate(-55%, -55%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
 
-        .particle { position: absolute; width: 60px; height: 60px; cursor: pointer; z-index: 19000; transition: top 1s cubic-bezier(0.25, 1, 0.5, 1), left 1s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
+        .particle { position: absolute; width: 35px; height: 35px; cursor: pointer; z-index: 19000; transition: top 1s cubic-bezier(0.25, 1, 0.5, 1), left 1s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
         .particle:active { transform: scale(0.9); }
         
         .crop, .tourist { position: absolute; font-size: 40px; cursor: pointer; z-index: 19000; animation: bounceIn 0.5s; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
         @keyframes bounceIn { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        .emotion { position: absolute; font-size: 28px; animation: floatUp 2s forwards; z-index: 19500; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 20% { transform: translateY(-10px) scale(1.2); } 100% { opacity: 0; transform: translateY(-40px) scale(1); } }
 
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20000; }
         
@@ -30,8 +34,12 @@
         .inv-item { display: flex; align-items: center; font-size: 16px; font-weight: bold; background: #eee; padding: 4px 10px; border-radius: 10px; }
         .inv-item img, .inv-item span.icon { width: 25px; height: 25px; margin-right: 5px; font-size: 20px; line-height: 25px; display: inline-block; text-align: center; }
         
-        #shop { position: absolute; top: 15px; right: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 50vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; }
-        #quest-panel { position: absolute; top: 55vh; right: 15px; pointer-events: auto; background: rgba(255,250,200,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 35vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #E6C229; }
+        #shop-toggle-btn { position: absolute; top: 15px; right: 15px; pointer-events: auto; background: #FF9800; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #E65100; box-shadow: 0 4px 0 #E65100; cursor: pointer; z-index: 20001; }
+        #shop-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #E65100; }
+        #shop { position: absolute; top: 60px; right: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 50vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; display: none; }
+        #quest-toggle-btn { position: absolute; top: 15px; right: 150px; pointer-events: auto; background: #E6C229; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #C4A000; box-shadow: 0 4px 0 #C4A000; cursor: pointer; z-index: 20001; }
+        #quest-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #C4A000; }
+        #quest-panel { position: absolute; top: 60px; right: 150px; pointer-events: auto; background: rgba(255,250,200,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 35vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #E6C229; display: none; }
         
         .panel-title { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
         
@@ -41,6 +49,7 @@
         .shop-item .icon-box img { max-width: 100%; max-height: 100%; }
         .shop-item .info { flex: 1; }
         .shop-item .name { font-weight: bold; font-size: 13px; color: #333; margin-bottom: 2px; }
+        .shop-item .desc { font-size: 11px; color: #007BFF; margin-bottom: 3px; word-break: keep-all; line-height: 1.2; }
         .shop-item .cost { font-size: 11px; color: #666; font-weight: bold; display: flex; flex-wrap: wrap; gap: 4px; }
         .shop-item .cost span { display: flex; align-items: center; }
         .shop-item .cost img { width: 12px; height: 12px; margin-right: 2px; }
@@ -67,18 +76,15 @@
         .building.draggable { cursor: grab; }
         .building.draggable:active { cursor: grabbing; filter: brightness(1.1); }
         
-        .size-1 { width: 50px; height: 50px; font-size: 30px; }
-        .size-2 { width: 100px; height: 100px; font-size: 60px; }
-        .size-3 { width: 150px; height: 150px; font-size: 80px; }
+        .size-1 { width: 30px; height: 30px; font-size: 20px; }
+        .size-2 { width: 60px; height: 60px; font-size: 40px; }
+        .size-3 { width: 90px; height: 90px; font-size: 50px; }
 
         .obj-3d { filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); background: rgba(255,255,255,0.5); border: 2px dashed #aaa; border-radius: 10px; }
         .obj-3d.has-img { background: transparent; border: none; }
         .obj-tile { z-index: 5 !important; border: 1px dashed rgba(255,255,255,0.3); }
         
         /* 특수 기능 효과 */
-        .lamp-glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,220,100,0.8) 0%, rgba(255,200,50,0.4) 40%, transparent 70%); width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; transition: opacity 2s; z-index: 14000; }
-        .night-mode .lamp-glow { opacity: 1; }
-        
         .oven-fire { position: absolute; bottom: 0; font-size: 40px; animation: flicker 0.5s infinite alternate; pointer-events: none; display: none; }
         @keyframes flicker { 0% { opacity: 0.8; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
 
@@ -89,25 +95,29 @@
     </style>
 </head>
 <body>
-    <div id="game-board">
-        <div id="night-overlay"></div>
-        <div id="volcano" class="obj-3d has-img" style="width:250px; height:250px;"></div>
+    <div id="viewport">
+        <div id="game-board">
+            <div id="volcano" class="obj-3d has-img"></div>
+        </div>
+        
         <div id="alert-text"></div>
         
         <div id="ui-layer">
             <div id="inventory">
-                <div class="inv-item" title="화산 가스"><img src="gas_processed.webp"><span id="inv-gas">0</span></div>
-                <div class="inv-item" title="용암"><img src="lava_processed.webp"><span id="inv-lava">0</span></div>
-                <div class="inv-item" title="화산재"><img src="ash_processed.webp"><span id="inv-ash">0</span></div>
-                <div class="inv-item" title="화산 암석 조각"><img src="rock_processed.webp"><span id="inv-rock">0</span></div>
-                <div class="inv-item" title="수확한 고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
-                <div class="inv-item" title="용암 군고구마"><span class="icon">🍕</span><span id="inv-roasted">0</span></div>
-                <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
+                <div class="inv-item" onclick="showResInfo('gas', '화산 가스', '화산 분출물 중 기체 상태입니다. 대부분 수증기이고 이산화 탄소 등도 포함됩니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="gas_processed.webp">화산 가스: <span id="inv-gas">0</span></div>
+                <div class="inv-item" onclick="showResInfo('lava', '용암', '화산 분출물 중 액체 상태입니다. 마그마가 지표로 흘러나온 것으로, 식으면 암석이 됩니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="lava_processed.webp">용암: <span id="inv-lava">0</span></div>
+                <div class="inv-item" onclick="showResInfo('ash', '화산재', '화산 분출물 중 고체 상태입니다. 아주 작은 알갱이로 바람을 타고 멀리 날아갈 수 있으며, 나중에는 땅을 비옥하게 합니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="ash_processed.webp">화산재: <span id="inv-ash">0</span></div>
+                <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
+                <div class="inv-item" title="수확한 고구마"><span class="icon">🍠</span>고구마: <span id="inv-potato">0</span></div>
+                <div class="inv-item" title="용암 군고구마"><span class="icon">🍕</span>군고구마: <span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span>관광객: <span id="inv-tourists">0</span></div>
             </div>
             
             <button id="dict-btn" onclick="document.getElementById('dict-modal').style.display='flex'">📖 화산 도감</button>
             <div id="medals-container"></div>
             
+            <button id="quest-toggle-btn" onclick="toggleQuest()">📜 퀘스트 열기</button>
+            <button id="shop-toggle-btn" onclick="toggleShop()">🛒 상점 열기</button>
             <div id="shop">
                 <div class="panel-title">상점 (드래그로 겹쳐짓기)</div>
                 <div id="shop-items"></div>
@@ -127,6 +137,15 @@
             </div>
         </div>
         
+        <div id="res-info-modal" class="modal-bg" style="z-index: 35000;" onclick="this.style.display='none'">
+            <div class="modal-content" style="max-width: 400px; padding: 20px;" onclick="event.stopPropagation()">
+                <div style="font-size: 50px; margin-bottom: 10px;" id="res-info-icon"></div>
+                <h2 id="res-info-title" style="margin: 0 0 10px 0; color: #FF5722; font-size: 24px;">이름</h2>
+                <div id="res-info-desc" style="font-size: 16px; font-weight: bold; color: #333; line-height: 1.5; margin-bottom: 20px; word-break: keep-all;">설명</div>
+                <button class="close-btn" style="margin-top: 0;" onclick="document.getElementById('res-info-modal').style.display='none'">확인</button>
+            </div>
+        </div>
+        
         <div id="dict-modal" class="modal-bg">
             <div class="modal-content">
                 <h2>📖 나의 화산 도감</h2>
@@ -139,49 +158,98 @@
     </div>
 
     <script>
-        // 초기 자원 (테스트용 넉넉히)
         const inventory = { gas: 200, lava: 200, ash: 200, rock: 200, potato: 0, roasted: 0, tourists: 0 };
         const resTypes = ['gas', 'lava', 'ash', 'rock'];
         
         let placedBuildings = [];
         let quizzesAnswered = 0;
-        let dayTick = 0; // 1초마다 증가, 120초 낮, 60초 밤
-        let isNight = false;
+        let dayTick = 0; 
+        
+        // Panning logic
+        let boardX = -1000; // Start at center-ish of 3000x3000 map
+        let boardY = -1000;
+        const board = document.getElementById('game-board');
+        board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+        
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+
+        document.getElementById('viewport').addEventListener('mousedown', (e) => {
+            if(e.target === board) {
+                isPanning = true;
+                panStartX = e.clientX - boardX;
+                panStartY = e.clientY - boardY;
+                board.style.cursor = 'grabbing';
+            }
+        });
+        document.addEventListener('mousemove', (e) => {
+            if(isPanning) {
+                boardX = e.clientX - panStartX;
+                boardY = e.clientY - panStartY;
+                board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+            }
+        });
+        document.addEventListener('mouseup', () => {
+            if(isPanning) {
+                isPanning = false;
+                board.style.cursor = '';
+            }
+        });
+        
+        document.getElementById('viewport').addEventListener('touchstart', (e) => {
+            if(e.target === board) {
+                isPanning = true;
+                panStartX = e.touches[0].clientX - boardX;
+                panStartY = e.touches[0].clientY - boardY;
+            }
+        }, {passive: false});
+        document.addEventListener('touchmove', (e) => {
+            if(isPanning) {
+                e.preventDefault(); 
+                boardX = e.touches[0].clientX - panStartX;
+                boardY = e.touches[0].clientY - panStartY;
+                board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+            }
+        }, {passive: false});
+        document.addEventListener('touchend', () => { isPanning = false; });
 
         const items = {
-            hot: { name: '천연 화산 온천', type: '3d', size: 2, img: 'hot_processed.webp', cost: { gas: 15, rock: 10 } },
-            harubang: { name: '현무암 조각 공원', type: '3d', size: 2, img: 'harubang_processed.webp', cost: { lava: 10, rock: 20 } },
-            farm: { name: '비옥한 화산재 농장', type: '3d', size: 3, img: 'farm_processed.webp', cost: { ash: 25, lava: 5 } },
-            castle: { name: '단단한 현무암 성곽', type: '3d', size: 3, img: 'castle_processed.webp', cost: { lava: 20, rock: 25, ash: 5 } },
-            wall: { name: '현무암 돌담', type: '3d', size: 1, emoji: '🧱', cost: { rock: 3, ash: 1 } },
-            pillar: { name: '주상절리 육각 기둥', type: '3d', size: 1, emoji: '🏛️', cost: { lava: 5, rock: 5 } },
-            bomb: { name: '화산탄 조각상', type: '3d', size: 1, emoji: '🍠', cost: { lava: 5, gas: 5 } },
-            pond: { name: '부석 미니 연못', type: '3d', size: 2, emoji: '⛲', cost: { gas: 15, rock: 5 } },
-            power: { name: '지열 발전소', type: '3d', size: 3, emoji: '🏭', cost: { gas: 30, lava: 10 } },
-            oven: { name: '마그마 돌 화덕', type: '3d', size: 2, emoji: '🍕', cost: { lava: 15, rock: 5 } },
-            lamp: { name: '현무암 가로등', type: '3d', size: 1, emoji: '🏮', cost: { lava: 3, gas: 5 } },
-            crater: { name: '분화구 호수 타일', type: 'tile', size: 3, emoji: '💧', cost: { ash: 5, rock: 5, gas: 5 } },
-            sand: { name: '검은 모래 해변 타일', type: 'tile', emoji: '🏖️', size: 2, cost: { ash: 10, rock: 2 } },
-            garden: { name: '화산재 텃밭 타일', type: 'tile', size: 3, emoji: '🌱', cost: { ash: 15, gas: 5 } }
+            // Size 1
+            wall: { name: '현무암 돌담', type: '3d', size: 1, img: 'wall_processed.png', desc: '용암이 식어 굳어진 구멍 뚫린 암석', cost: { rock: 3, ash: 1 } },
+            bomb: { name: '화산탄 조각상', type: '3d', size: 1, img: 'bomb_processed.png', desc: '공중에서 굳어진 커다란 화산 암석 조각', cost: { lava: 5, gas: 5 } },
+            pillar: { name: '주상절리 육각 기둥', type: '3d', size: 1, img: 'pillar_processed.png', desc: '용암이 빠르게 식으면서 기둥 모양으로 굳어짐', cost: { lava: 5, rock: 5 } },
+            
+            // Size 2
+            hot: { name: '천연 화산 온천', type: '3d', size: 2, img: 'hot_processed.webp', desc: '지하수가 마그마에 의해 데워져 솟아남', cost: { gas: 15, rock: 10 } },
+            harubang: { name: '현무암 조각 공원', type: '3d', size: 2, img: 'harubang_processed.webp', desc: '현무암을 조각하여 만든 훌륭한 관광 자원', cost: { lava: 10, rock: 20 } },
+            pond: { name: '부석 미니 연못', type: '3d', size: 2, img: 'pond_processed.png', desc: '가스가 빠져나가 구멍이 많은 가벼운 암석', cost: { gas: 15, rock: 5 } },
+            oven: { name: '마그마 돌 화덕', type: '3d', size: 2, img: 'oven_processed.png', desc: '마그마의 뜨거운 열로 고구마를 구울 수 있는 화덕', cost: { lava: 15, rock: 5 } },
+            sand: { name: '검은 모래 해변 타일', type: 'tile', size: 2, emoji: '🏖️', desc: '현무암이 잘게 부서져 만들어진 모래', cost: { ash: 10, rock: 2 } },
+            
+            // Size 3
+            farm: { name: '비옥한 화산재 농장', type: '3d', size: 3, img: 'farm_basic_processed.png', desc: '화산재가 흙에 섞여 땅을 걸름지게 함', cost: { ash: 25, lava: 5 } },
+            castle: { name: '단단한 현무암 성곽', type: '3d', size: 3, img: 'castle_processed.webp', desc: '단단한 암석 조각들을 쌓아 만든 방어벽', cost: { lava: 20, rock: 25, ash: 5 } },
+            power: { name: '지열 발전소', type: '3d', size: 3, emoji: '🏭', desc: '마그마의 엄청난 열에너지로 전기를 생산', cost: { gas: 30, lava: 10 } },
+            crater: { name: '분화구 호수 타일', type: 'tile', size: 3, emoji: '💧', desc: '분화구(마그마가 나온 구멍)에 물이 고임', cost: { ash: 5, rock: 5, gas: 5 } },
+            garden: { name: '화산재 텃밭 타일', type: 'tile', size: 3, emoji: '🌱', desc: '화산 분출물 중 고체인 화산재 활용', cost: { ash: 15, gas: 5 } }
         };
 
         const quests = [
             { id: 'q1', title: '화산의 쉼터', desc: '온천 1개 건설', condition: () => countB('hot') >= 1, done: false, dict: '온천은 마그마에 데워진 솟아나는 물로, 피로를 풀어주고 훌륭한 관광 자원이 됩니다.' },
+            { id: 'q5', title: '척척박사 전문가', desc: '화산 퀴즈 3번 정답', condition: () => quizzesAnswered >= 3, done: false, medal: '🎓', dict: '화산 분출물에는 기체(화산가스), 액체(용암), 고체(화산재, 화산 암석 조각) 3가지 상태가 모두 존재합니다.' },
             { id: 'q2', title: '비옥한 땅의 비밀', desc: '농장에서 고구마 3개 수확', condition: () => inventory.potato >= 3, done: false, dict: '화산재는 초기엔 피해를 주지만, 시간이 지나면 땅을 매우 걸름지게(비옥하게) 만들어 농사가 잘 되게 해줘요.' },
             { id: 'q3', title: '지구의 끓는 피', desc: '화덕에서 군고구마 1번 굽기', condition: () => inventory.roasted >= 1, done: false, dict: '마그마의 엄청난 열기는 지열 발전으로 전기를 만들거나 요리에 활용할 수 있는 소중한 에너지입니다.' },
-            { id: 'q4', title: '화산 마을의 인기', desc: '관광객 5명 터치하여 반기기', condition: () => inventory.tourists >= 5, done: false, medal: '🏅', dict: '주상절리나 분화구 등 독특한 화산 지형은 세계적인 관광 명소가 되어 사람들을 끌어모읍니다.' },
-            { id: 'q5', title: '척척박사 전문가', desc: '화산 퀴즈 3번 정답', condition: () => quizzesAnswered >= 3, done: false, medal: '🎓', dict: '화산 분출물에는 기체(화산가스), 액체(용암), 고체(화산재, 화산 암석 조각) 3가지 상태가 모두 존재합니다.' },
-            { id: 'q6', title: '빛나는 화산의 밤', desc: '가로등을 설치해 밤 밝히기', condition: () => countB('lamp') >= 1 && isNight, done: false, dict: '제주도나 하와이처럼 현무암이 흔한 곳에서는 구멍 뚫린 돌을 가공해 돌담, 조각상 등 다양한 생활용품을 만듭니다.' }
+            { id: 'q4', title: '화산 마을의 인기', desc: '관광객 5명 터치하여 반기기', condition: () => inventory.tourists >= 5, done: false, medal: '🏅', dict: '주상절리나 분화구 등 독특한 화산 지형은 세계적인 관광 명소가 되어 사람들을 끌어모읍니다.' }
         ];
 
         const questions = [
-            { q: "땅속 깊은 곳에서 암석이 녹은 물질은 무엇일까요?", opts: ["화산 가스", "마그마", "지하수", "화산재"], a: 1 },
-            { q: "화산 활동으로 나오는 기체로, 대부분 수증기로 이루어진 것은?", opts: ["산소", "이산화 탄소", "화산 가스", "질소"], a: 2 },
-            { q: "마그마가 지표면을 흐르는 것으로, 굳어지면 암석이 되는 것은?", opts: ["용암", "화산재", "지하수", "온천수"], a: 0 },
-            { q: "화산 분출물 중 크기가 매우 작고, 땅을 비옥하게 만들어주는 고체 물질은?", opts: ["화산 암석 조각", "마그마", "화산 가스", "화산재"], a: 3 }
+            { q: "땅속 깊은 곳에서 암석이 녹은 물질은 무엇일까요?", opts: ["화산 가스", "마그마", "지하수", "화산재"], a: 1, exp: "마그마는 땅속 깊은 곳에 있는 암석이 높은 열에 의해 녹아 있는 물질입니다." },
+            { q: "화산 활동으로 나오는 기체로, 대부분 수증기로 이루어진 것은?", opts: ["산소", "이산화 탄소", "화산 가스", "질소"], a: 2, exp: "화산 가스는 화산 폭발 시 나오는 기체 분출물입니다." },
+            { q: "마그마가 지표면을 흐르는 것으로, 굳어지면 암석이 되는 것은?", opts: ["용암", "화산재", "지하수", "온천수"], a: 0, exp: "용암은 마그마가 땅 위로 분출하여 가스가 빠져나가고 남은 액체 물질입니다." },
+            { q: "화산 분출물 중 크기가 매우 작고, 땅을 비옥하게 만들어주는 고체 물질은?", opts: ["화산 암석 조각", "마그마", "화산 가스", "화산재"], a: 3, exp: "화산재는 고체 분출물 중 아주 작고 가벼운 가루 형태입니다." }
         ];
 
-        function countB(type) { return placedBuildings.filter(b => b.type === type).length; }
+        function countB(type) { return placedBuildings.filter(b => b.key === type).length; }
 
         function updateUI() {
             Object.keys(inventory).forEach(k => {
@@ -212,6 +280,7 @@
                         <div class="icon-box">${iconHtml}</div>
                         <div class="info">
                             <div class="name">${it.name}</div>
+                            <div class="desc">${it.desc || ''}</div>
                             <div class="cost">${costHtml}</div>
                         </div>
                     </div>
@@ -219,10 +288,46 @@
             }
         }
 
+        function toggleShop() {
+            const shop = document.getElementById('shop');
+            const btn = document.getElementById('shop-toggle-btn');
+            if (shop.style.display === 'none' || shop.style.display === '') {
+                shop.style.display = 'block';
+                btn.innerText = '❌ 상점 닫기';
+            } else {
+                shop.style.display = 'none';
+                btn.innerText = '🛒 상점 열기';
+            }
+        }
+        
+        function toggleQuest() {
+            const panel = document.getElementById('quest-panel');
+            const btn = document.getElementById('quest-toggle-btn');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'block';
+                btn.innerText = '❌ 퀘스트 닫기';
+            } else {
+                panel.style.display = 'none';
+                btn.innerText = '📜 퀘스트 열기';
+            }
+        }
+        
+        function showResInfo(type, title, desc) {
+            const modal = document.getElementById('res-info-modal');
+            let iconHtml = type === 'gas' || type === 'lava' || type === 'ash' || type === 'rock' ? 
+                           `<img src="${type}_processed.webp" style="width:50px;height:50px;">` : '❓';
+            document.getElementById('res-info-icon').innerHTML = iconHtml;
+            document.getElementById('res-info-title').innerText = title;
+            document.getElementById('res-info-desc').innerText = desc;
+            modal.style.display = 'flex';
+        }
+
         function renderQuests() {
             const container = document.getElementById('quest-items');
             container.innerHTML = '';
-            let anyUnlocked = false;
+            let anyUnlocked = document.getElementById('dict-content').innerHTML.indexOf('dict-entry') !== -1;
+            
+            let shownActive = false;
             
             quests.forEach(q => {
                 if(!q.done && q.condition()) {
@@ -246,12 +351,22 @@
                     `;
                 }
                 
-                container.innerHTML += `
-                    <div class="quest-item ${q.done ? 'done' : ''}">
-                        <div class="quest-title">${q.title}</div>
-                        ${q.done ? '✅ 완료' : '🔲 ' + q.desc}
-                    </div>
-                `;
+                if (q.done) {
+                    container.innerHTML += `
+                        <div class="quest-item done">
+                            <div class="quest-title">${q.title}</div>
+                            ✅ 완료
+                        </div>
+                    `;
+                } else if (!shownActive) {
+                    shownActive = true;
+                    container.innerHTML += `
+                        <div class="quest-item">
+                            <div class="quest-title">${q.title}</div>
+                            🔲 ${q.desc}
+                        </div>
+                    `;
+                }
             });
         }
 
@@ -260,13 +375,78 @@
                 el.style.zIndex = 5;
             } else {
                 const rect = el.getBoundingClientRect();
-                el.style.zIndex = Math.floor(rect.bottom);
+                el.style.zIndex = el.offsetTop + el.offsetHeight;
+            }
+        }
+
+        function isCollidingLocal(el1, el2) {
+            const r1 = { left: el1.offsetLeft, top: el1.offsetTop, right: el1.offsetLeft + el1.offsetWidth, bottom: el1.offsetTop + el1.offsetHeight };
+            const r2 = { left: el2.offsetLeft, top: el2.offsetTop, right: el2.offsetLeft + el2.offsetWidth, bottom: el2.offsetTop + el2.offsetHeight };
+            return !(r1.right <= r2.left || r1.left >= r2.right || r1.bottom <= r2.top || r1.top >= r2.bottom);
+        }
+
+        function checkOverlap(el) {
+            const vol = document.getElementById('volcano');
+            if (isCollidingLocal(el, vol)) return true;
+            
+            for (let b of placedBuildings) {
+                if (b.el === el) continue;
+                if (isCollidingLocal(el, b.el)) return true;
+            }
+            return false;
+        }
+
+        function handleOvenClick(ovenEl) {
+            if(inventory.potato >= 1 && !ovenEl.dataset.baking) {
+                inventory.potato--;
+                updateUI();
+                ovenEl.dataset.baking = "true";
+                if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'block';
+                ovenEl.style.filter = 'drop-shadow(0 0 15px #FF5722) brightness(1.2)';
+                showAlert("🔥 고구마를 굽는 중... (10초)");
+                
+                setTimeout(() => {
+                    ovenEl.dataset.baking = "";
+                    if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'none';
+                    ovenEl.style.filter = '';
+                    inventory.roasted++;
+                    updateUI();
+                    showAlert("🍕 용암 군고구마 완성!");
+                    
+                    const p = document.createElement('div');
+                    p.className = 'crop';
+                    p.innerText = '🍕';
+                    p.style.left = (parseInt(ovenEl.style.left) + ovenEl.offsetWidth/2 - 20) + 'px';
+                    p.style.top = (parseInt(ovenEl.style.top) + ovenEl.offsetHeight/2 - 20) + 'px';
+                    p.addEventListener('mousedown', () => checkCollection(p));
+                    p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
+                    board.appendChild(p);
+                }, 10000);
+            } else if (inventory.potato < 1 && !ovenEl.dataset.baking) {
+                showAlert("고구마가 부족합니다!");
+            }
+        }
+
+        function handleFarmClick(farmEl) {
+            if (farmEl.dataset.upgraded === "true") {
+                showAlert("이미 최고 단계의 비옥한 농장입니다!");
+                return;
+            }
+            if (inventory.ash >= 20) {
+                if (confirm("화산재 20개를 사용하여 '비옥한 화산재 농장'으로 업그레이드 하시겠습니까?")) {
+                    inventory.ash -= 20;
+                    farmEl.dataset.upgraded = "true";
+                    farmEl.style.background = `url('farm_upgraded_processed.png') no-repeat center/contain`;
+                    updateUI();
+                    showAlert("✨ 농장이 비옥해졌습니다! 고구마가 더 빨리 자랍니다.");
+                }
+            } else {
+                showAlert(`업그레이드하려면 화산재가 20개 필요합니다. (현재: ${inventory.ash || 0}개)`);
             }
         }
 
         setTimeout(() => updateYSorting(document.getElementById('volcano')), 100);
 
-        // 상호작용 관련 로직
         let isSweeping = false;
         document.addEventListener('mousedown', () => isSweeping = true);
         document.addEventListener('mouseup', () => isSweeping = false);
@@ -293,24 +473,24 @@
                 showAlert("🍠 고구마 수확!");
             } else if(el.classList.contains('tourist')) {
                 inventory.tourists++;
-                el.remove();
                 updateUI();
-                showAlert("👦 관광객 환영!");
+                showAlert("👦 관광객 터치 환영!");
             }
         }
 
-        // 마그마 화덕 기능
         function handleOvenClick(ovenEl) {
             if(inventory.potato >= 1 && !ovenEl.dataset.baking) {
                 inventory.potato--;
                 updateUI();
                 ovenEl.dataset.baking = "true";
-                ovenEl.querySelector('.oven-fire').style.display = 'block';
+                if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'block';
+                ovenEl.style.filter = 'drop-shadow(0 0 15px #FF5722) brightness(1.2)';
                 showAlert("🔥 고구마를 굽는 중... (10초)");
                 
                 setTimeout(() => {
                     ovenEl.dataset.baking = "";
-                    ovenEl.querySelector('.oven-fire').style.display = 'none';
+                    if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'none';
+                    ovenEl.style.filter = '';
                     inventory.roasted++;
                     updateUI();
                     showAlert("🍕 용암 군고구마 완성!");
@@ -320,7 +500,7 @@
                     p.innerText = '🍕';
                     p.style.left = (parseInt(ovenEl.style.left) + ovenEl.offsetWidth/2 - 20) + 'px';
                     p.style.top = (parseInt(ovenEl.style.top) - 40) + 'px';
-                    document.getElementById('game-board').appendChild(p);
+                    board.appendChild(p);
                     setTimeout(()=>p.remove(), 5000);
                 }, 10000);
             } else if (!ovenEl.dataset.baking) {
@@ -328,7 +508,6 @@
             }
         }
 
-        // 건설 및 드래그
         let placingType = null;
         let shadow = null;
 
@@ -359,59 +538,68 @@
                     shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
                 }
                 
-                if(key === 'lamp') {
-                    shadow.innerHTML += '<div class="lamp-glow"></div>';
-                } else if (key === 'oven') {
+                if (key === 'oven') {
                     shadow.innerHTML += '<div class="oven-fire">🔥</div>';
                 }
                 
                 shadow.style.opacity = '0.6';
                 shadow.style.pointerEvents = 'none';
                 
-                let initX = Math.round((window.innerWidth/2 - shadow.offsetWidth/2) / 50) * 50;
-                let initY = Math.round((window.innerHeight/2 - shadow.offsetHeight/2) / 50) * 50;
+                let cx = (window.innerWidth / 2) - boardX;
+                let cy = (window.innerHeight / 2) - boardY;
+                
+                let initX = Math.round((cx - shadow.offsetWidth/2) / 30) * 30;
+                let initY = Math.round((cy - shadow.offsetHeight/2) / 30) * 30;
                 shadow.style.left = initX + 'px';
                 shadow.style.top = initY + 'px';
                 
-                document.getElementById('game-board').appendChild(shadow);
+                board.appendChild(shadow);
             } else {
                 showAlert("자원이 부족합니다!");
             }
         }
 
-        document.getElementById('game-board').addEventListener('mousemove', (e) => {
+        document.getElementById('viewport').addEventListener('mousemove', (e) => {
             if(shadow) {
-                let x = Math.round((e.clientX - shadow.offsetWidth/2)/50)*50;
-                let y = Math.round((e.clientY - shadow.offsetHeight/2)/50)*50;
+                let x = Math.round((e.clientX - boardX - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((e.clientY - boardY - shadow.offsetHeight/2)/30)*30;
                 shadow.style.left = x + 'px';
                 shadow.style.top = y + 'px';
                 updateYSorting(shadow);
             }
         });
 
-        document.getElementById('game-board').addEventListener('click', (e) => {
-            if(e.target.closest('#shop') || e.target.closest('#inventory') || e.target.closest('.modal-bg') || e.target.closest('#volcano') || e.target.closest('#quest-panel')) return;
+        document.getElementById('viewport').addEventListener('click', (e) => {
+            if(e.target.closest('#shop') || e.target.closest('#inventory') || e.target.closest('.modal-bg') || e.target.closest('#volcano') || e.target.closest('#quest-panel') || e.target.closest('#shop-toggle-btn') || e.target.closest('#dict-btn') || e.target.closest('#quest-toggle-btn')) return;
 
             if(placingType && shadow) {
+                if (checkOverlap(shadow)) {
+                    showAlert("여기에 건설할 수 없습니다! 다른 건물과 겹칩니다.");
+                    return;
+                }
+                
                 shadow.style.opacity = '1';
                 shadow.style.pointerEvents = 'auto';
                 
-                let x = Math.round((e.clientX - shadow.offsetWidth/2)/50)*50;
-                let y = Math.round((e.clientY - shadow.offsetHeight/2)/50)*50;
+                let x = Math.round((e.clientX - boardX - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((e.clientY - boardY - shadow.offsetHeight/2)/30)*30;
                 shadow.style.left = x + 'px';
                 shadow.style.top = y + 'px';
                 updateYSorting(shadow);
                 
                 const key = placingType;
-                shadow.addEventListener('mousedown', (ev) => {
-                    if(key === 'oven') handleOvenClick(shadow);
-                    else checkCollection(shadow);
-                    dragStart(ev, shadow);
+                const el = shadow;
+                el.addEventListener('mousedown', (ev) => {
+                    if(key === 'oven') handleOvenClick(el);
+                    else if(key === 'farm') handleFarmClick(el);
+                    else checkCollection(el);
+                    dragStart(ev, el);
                 });
-                shadow.addEventListener('touchstart', (ev) => {
-                    if(key === 'oven') handleOvenClick(shadow);
-                    else checkCollection(shadow);
-                    dragStart(ev, shadow);
+                el.addEventListener('touchstart', (ev) => {
+                    if(key === 'oven') handleOvenClick(el);
+                    else if(key === 'farm') handleFarmClick(el);
+                    else checkCollection(el);
+                    dragStart(ev, el);
                 }, {passive: false});
                 
                 placedBuildings.push({ key: key, el: shadow, timer: 0 });
@@ -419,7 +607,7 @@
                 shadow = null;
                 placingType = null;
                 showAlert("건설 완료!");
-                updateUI(); // 퀘스트 체크
+                updateUI(); 
             }
         });
 
@@ -439,26 +627,40 @@
         window.addEventListener('mousemove', (e) => {
             if(!draggingEl) return;
             let dx = e.clientX - startX; let dy = e.clientY - startY;
-            draggingEl.style.left = (Math.round((initX + dx)/50)*50) + 'px';
-            draggingEl.style.top = (Math.round((initY + dy)/50)*50) + 'px';
+            draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
+            draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
         });
         window.addEventListener('mouseup', () => {
-            if(draggingEl) { updateYSorting(draggingEl); draggingEl = null; }
+            if(draggingEl) { 
+                if (checkOverlap(draggingEl)) {
+                    showAlert("건물이 겹칩니다! 원래 자리로 되돌아갑니다.");
+                    draggingEl.style.left = initX + 'px';
+                    draggingEl.style.top = initY + 'px';
+                }
+                updateYSorting(draggingEl); 
+                draggingEl = null; 
+            }
         });
         
         window.addEventListener('touchmove', (e) => {
             if(!draggingEl) return;
             let dx = e.touches[0].clientX - startX; let dy = e.touches[0].clientY - startY;
-            draggingEl.style.left = (Math.round((initX + dx)/50)*50) + 'px';
-            draggingEl.style.top = (Math.round((initY + dy)/50)*50) + 'px';
+            draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
+            draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
         }, {passive:false});
         window.addEventListener('touchend', () => {
-            if(draggingEl) { updateYSorting(draggingEl); draggingEl = null; }
+            if(draggingEl) { 
+                if (checkOverlap(draggingEl)) {
+                    showAlert("건물이 겹칩니다! 원래 자리로 되돌아갑니다.");
+                    draggingEl.style.left = initX + 'px';
+                    draggingEl.style.top = initY + 'px';
+                }
+                updateYSorting(draggingEl); 
+                draggingEl = null; 
+            }
         });
 
-        // 화산 폭발 로직
         function createParticle(type, startX, startY) {
-            const board = document.getElementById('game-board');
             const p = document.createElement('div');
             p.className = 'particle';
             p.dataset.res = type;
@@ -466,7 +668,6 @@
             p.style.left = startX + 'px'; p.style.top = startY + 'px';
             board.appendChild(p);
             
-            // 발전소 자동 수집 체크
             const powers = placedBuildings.filter(b => b.key === 'power');
             if(powers.length > 0 && Math.random() > 0.4) {
                 const target = powers[0].el;
@@ -484,7 +685,7 @@
 
             setTimeout(() => {
                 const angle = Math.random() * Math.PI * 2;
-                const dist = 100 + Math.random() * 400; 
+                const dist = 50 + Math.random() * 250; 
                 p.style.left = (startX + Math.cos(angle)*dist) + 'px';
                 p.style.top = (startY + Math.sin(angle)*dist) + 'px';
             }, 50);
@@ -499,9 +700,9 @@
             const vol = document.getElementById('volcano');
             vol.classList.add('shake');
             setTimeout(() => vol.classList.remove('shake'), 500);
-            const rect = vol.getBoundingClientRect();
-            const startX = rect.left + rect.width/2 - 30;
-            const startY = rect.top + rect.height/2;
+            
+            const startX = vol.offsetLeft;
+            const startY = vol.offsetTop;
 
             const amount = 3 * amountMultiplier + Math.floor(Math.random() * 3 * amountMultiplier);
             for(let i=0; i<amount; i++) {
@@ -526,7 +727,9 @@
                         showAlert("정답! 대폭발!");
                         quizzesAnswered++; updateUI();
                         erupt(6); 
-                    } else showAlert("앗! 틀렸어요.");
+                    } else {
+                        showAlert("앗! 틀렸어요.<br><span style='font-size:18px; color:#FFE0B2;'>" + currentQuiz.exp + "</span>");
+                    }
                     modal.style.display = 'none';
                 };
                 optsDiv.appendChild(btn);
@@ -534,76 +737,141 @@
             modal.style.display = 'flex';
         });
 
-        // 1초마다 실행되는 타이쿤 메인 루프 (낮밤, 농장, 관광객)
+        let touristsList = [];
+        
+        function spawnTourist() {
+            const edges = [
+                {x: Math.random()*3000, y: -50},
+                {x: Math.random()*3000, y: 3050},
+                {x: -50, y: Math.random()*3000},
+                {x: 3050, y: Math.random()*3000}
+            ];
+            const edge = edges[Math.floor(Math.random() * edges.length)];
+            
+            const t = document.createElement('div');
+            t.className = 'tourist'; t.innerText = '👦';
+            t.style.left = edge.x + 'px';
+            t.style.top = edge.y + 'px';
+            t.style.transition = 'left 1s linear, top 1s linear';
+            board.appendChild(t);
+            
+            t.addEventListener('mousedown', () => checkCollection(t));
+            t.addEventListener('mouseover', () => { if(isSweeping) checkCollection(t); });
+            
+            touristsList.push({ el: t, x: edge.x, y: edge.y, state: 'roaming', target: null, timer: 0 });
+        }
+        
+        function getEmotionFor(key) {
+            if (key === 'hot') return '♨️';
+            if (key === 'farm' || key === 'oven') return '🤤';
+            if (key === 'harubang' || key === 'castle') return '📸';
+            return '👍';
+        }
+        
+        function showEmotion(x, y, emoji) {
+            const e = document.createElement('div');
+            e.className = 'emotion';
+            e.innerText = emoji;
+            e.style.left = (x + 10) + 'px';
+            e.style.top = (y - 30) + 'px';
+            board.appendChild(e);
+            setTimeout(() => e.remove(), 2000);
+        }
+
         setInterval(() => {
             dayTick++;
-            const wasNight = isNight;
-            isNight = (dayTick % 180) >= 120; // 120초 낮, 60초 밤
-            
-            if(isNight && !wasNight) {
-                document.getElementById('night-overlay').style.opacity = '1';
-                document.body.classList.add('night-mode');
-                showAlert("🌙 밤이 되었습니다. 가로등이 없으면 관광객이 떠납니다!");
-                updateUI(); // 퀘스트 6번 체크
-            } else if (!isNight && wasNight) {
-                document.getElementById('night-overlay').style.opacity = '0';
-                document.body.classList.remove('night-mode');
-                showAlert("☀️ 아침이 밝았습니다!");
+
+            const maxTourists = placedBuildings.length * 2 + 3;
+            if (touristsList.length < maxTourists && Math.random() < 0.3) {
+                spawnTourist();
             }
 
-            // 오토마톤
             placedBuildings.forEach(b => {
                 b.timer++;
-                
-                // 농장 수확 (30초마다)
-                if(b.key === 'farm' && b.timer >= 30) {
+                let threshold = b.el.dataset.upgraded === "true" ? 15 : 30;
+                if(b.key === 'farm' && b.timer >= threshold) {
                     b.timer = 0;
                     const p = document.createElement('div');
                     p.className = 'crop'; p.innerText = '🍠';
-                    p.style.left = (parseInt(b.el.style.left) + 50 + Math.random()*50) + 'px';
-                    p.style.top = (parseInt(b.el.style.top) + Math.random()*50) + 'px';
+                    p.style.left = (parseInt(b.el.style.left) + 30 + Math.random()*30) + 'px';
+                    p.style.top = (parseInt(b.el.style.top) + Math.random()*30) + 'px';
                     p.addEventListener('mousedown', () => checkCollection(p));
                     p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
-                    document.getElementById('game-board').appendChild(p);
-                }
-                
-                // 온천 관광객 (시너지 계산)
-                if(b.key === 'hot') {
-                    // 주변 조각상 개수 (반경 300px 이내)
-                    const bx = parseInt(b.el.style.left); const by = parseInt(b.el.style.top);
-                    const sculptures = placedBuildings.filter(ob => ['harubang','bomb','pillar'].includes(ob.key)).filter(ob => {
-                        const ox = parseInt(ob.el.style.left); const oy = parseInt(ob.el.style.top);
-                        return Math.abs(ox-bx) < 300 && Math.abs(oy-by) < 300;
-                    }).length;
-                    
-                    const spawnRate = Math.max(5, 20 - (sculptures * 5)); // 최소 5초
-                    if(b.timer >= spawnRate) {
-                        b.timer = 0;
-                        if(isNight && countB('lamp') === 0) return; // 밤인데 가로등 없으면 안옴
-                        
-                        const t = document.createElement('div');
-                        t.className = 'tourist'; t.innerText = '👦';
-                        t.style.left = (bx - 50 + Math.random()*200) + 'px';
-                        t.style.top = (by + Math.random()*100) + 'px';
-                        t.addEventListener('mousedown', () => checkCollection(t));
-                        t.addEventListener('mouseover', () => { if(isSweeping) checkCollection(t); });
-                        document.getElementById('game-board').appendChild(t);
-                        setTimeout(() => { if(t.parentNode) t.remove(); }, 10000); // 10초뒤 사라짐
-                    }
+                    board.appendChild(p);
                 }
             });
-            
-            // 밤인데 가로등 없으면 모든 관광객 증발
-            if(isNight && countB('lamp') === 0) {
-                document.querySelectorAll('.tourist').forEach(el => el.remove());
-            }
 
-            // 10초마다 자동 분출
             if(dayTick % 10 === 0) erupt(1);
 
         }, 1000);
 
-        // 초기화
+        setInterval(() => {
+            touristsList.forEach((t, i) => {
+                if (!t) return;
+                
+                if (t.state === 'roaming') {
+                    if (placedBuildings.length > 0 && Math.random() < 0.5) {
+                        t.target = placedBuildings[Math.floor(Math.random() * placedBuildings.length)];
+                        t.state = 'moving';
+                    } else {
+                        t.x += (Math.random()-0.5)*300;
+                        t.y += (Math.random()-0.5)*300;
+                        t.x = Math.max(0, Math.min(3000, t.x));
+                        t.y = Math.max(0, Math.min(3000, t.y));
+                        t.el.style.left = t.x + 'px';
+                        t.el.style.top = t.y + 'px';
+                    }
+                } else if (t.state === 'moving') {
+                    if (t.target && t.target.el.parentNode) {
+                        const tx = parseInt(t.target.el.style.left) + t.target.el.offsetWidth/2;
+                        const ty = parseInt(t.target.el.style.top) + t.target.el.offsetHeight/2;
+                        
+                        const dx = tx - t.x;
+                        const dy = ty - t.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        
+                        if (dist < 80) {
+                            t.state = 'enjoying';
+                            t.timer = 5; 
+                            t.el.style.transition = 'none'; 
+                        } else {
+                            const speed = 100; 
+                            const ratio = Math.min(1, speed / dist);
+                            t.x += dx * ratio;
+                            t.y += dy * ratio;
+                            t.el.style.left = t.x + 'px';
+                            t.el.style.top = t.y + 'px';
+                        }
+                    } else {
+                        t.state = 'roaming';
+                    }
+                } else if (t.state === 'enjoying') {
+                    t.timer--;
+                    if (t.timer % 2 === 0) {
+                        showEmotion(t.x, t.y, getEmotionFor(t.target.key));
+                    }
+                    if (t.timer <= 0) {
+                        t.el.style.transition = 'left 1s linear, top 1s linear';
+                        if (Math.random() < 0.4) {
+                            t.state = 'leaving';
+                        } else {
+                            t.state = 'roaming'; 
+                        }
+                    }
+                } else if (t.state === 'leaving') {
+                    t.x += (t.x < 1500 ? -300 : 300);
+                    t.y += (t.y < 1500 ? -300 : 300);
+                    t.el.style.left = t.x + 'px';
+                    t.el.style.top = t.y + 'px';
+                    if (t.x < -200 || t.x > 3200 || t.y < -200 || t.y > 3200) {
+                        t.el.remove();
+                        touristsList[i] = null;
+                    }
+                }
+            });
+            touristsList = touristsList.filter(t => t !== null);
+        }, 1000); 
+
         renderShop();
         updateUI();
 
