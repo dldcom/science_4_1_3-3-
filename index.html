@@ -19,7 +19,7 @@
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-55%, -45%) rotate(-5deg); } 50% { transform: translate(-45%, -55%) rotate(5deg); } 75% { transform: translate(-55%, -55%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
 
-        .particle { position: absolute; width: 35px; height: 35px; cursor: pointer; z-index: 19000; transition: top 1s cubic-bezier(0.25, 1, 0.5, 1), left 1s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
+        .particle { position: absolute; width: 70px; height: 70px; cursor: pointer; z-index: 19000; transition: top 1s cubic-bezier(0.25, 1, 0.5, 1), left 1s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
         .particle:active { transform: scale(0.9); }
         
         .crop, .tourist { position: absolute; font-size: 40px; cursor: pointer; z-index: 19000; animation: bounceIn 0.5s; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
@@ -36,23 +36,23 @@
         
         #shop-toggle-btn { position: absolute; top: 15px; right: 15px; pointer-events: auto; background: #FF9800; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #E65100; box-shadow: 0 4px 0 #E65100; cursor: pointer; z-index: 20001; }
         #shop-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #E65100; }
-        #shop { position: absolute; top: 60px; right: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 50vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; display: none; }
+        #shop { position: absolute; top: 60px; right: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; width: 350px; height: 60vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; display: none; }
         #quest-toggle-btn { position: absolute; top: 15px; right: 150px; pointer-events: auto; background: #E6C229; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #C4A000; box-shadow: 0 4px 0 #C4A000; cursor: pointer; z-index: 20001; }
         #quest-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #C4A000; }
         #quest-panel { position: absolute; top: 60px; right: 150px; pointer-events: auto; background: rgba(255,250,200,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 35vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #E6C229; display: none; }
         
-        .panel-title { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+        .panel-title { text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 12px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 8px; }
         
-        .shop-item { display: flex; align-items: center; background: #fff; border: 2px solid #ddd; border-radius: 10px; padding: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+        .shop-item { display: flex; align-items: center; background: #fff; border: 2px solid #ddd; border-radius: 10px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
         .shop-item:active { transform: scale(0.98); }
-        .shop-item .icon-box { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 30px; background: #f5f5f5; border-radius: 8px; margin-right: 10px; }
+        .shop-item .icon-box { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 40px; background: #f5f5f5; border-radius: 10px; margin-right: 12px; }
         .shop-item .icon-box img { max-width: 100%; max-height: 100%; }
         .shop-item .info { flex: 1; }
-        .shop-item .name { font-weight: bold; font-size: 13px; color: #333; margin-bottom: 2px; }
-        .shop-item .desc { font-size: 11px; color: #007BFF; margin-bottom: 3px; word-break: keep-all; line-height: 1.2; }
-        .shop-item .cost { font-size: 11px; color: #666; font-weight: bold; display: flex; flex-wrap: wrap; gap: 4px; }
+        .shop-item .name { font-weight: bold; font-size: 18px; color: #333; margin-bottom: 4px; }
+        .shop-item .desc { font-size: 13px; color: #007BFF; margin-bottom: 6px; word-break: keep-all; line-height: 1.3; }
+        .shop-item .cost { font-size: 14px; color: #666; font-weight: bold; display: flex; flex-wrap: wrap; gap: 6px; }
         .shop-item .cost span { display: flex; align-items: center; }
-        .shop-item .cost img { width: 12px; height: 12px; margin-right: 2px; }
+        .shop-item .cost img { width: 16px; height: 16px; margin-right: 4px; }
 
         .quest-item { background: #fff; border: 2px dashed #E6C229; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: bold; }
         .quest-item.done { background: #d4edda; border-style: solid; border-color: #28a745; color: #155724; text-decoration: line-through; }
@@ -92,6 +92,10 @@
         
         /* 훈장 표시기 */
         #medals-container { position: absolute; top: 130px; left: 15px; display: flex; gap: 5px; font-size: 30px; pointer-events: none; z-index: 20000;}
+        
+        #zoom-controls { position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 30000; pointer-events: auto; }
+        .zoom-btn { background: rgba(255,255,255,0.95); border: 2px solid #555; border-radius: 12px; width: 55px; height: 55px; font-size: 26px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; }
+        .zoom-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -126,6 +130,11 @@
             <div id="quest-panel">
                 <div class="panel-title">📜 진행중인 퀘스트</div>
                 <div id="quest-items"></div>
+            </div>
+            
+            <div id="zoom-controls">
+                <button class="zoom-btn" onclick="changeZoom(0.2)">➕</button>
+                <button class="zoom-btn" onclick="changeZoom(-0.2)">➖</button>
             </div>
         </div>
         
@@ -168,8 +177,26 @@
         // Panning logic
         let boardX = -1000; // Start at center-ish of 3000x3000 map
         let boardY = -1000;
+        let zoomLevel = 1.0;
         const board = document.getElementById('game-board');
-        board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+        
+        function updateTransform() {
+            board.style.transform = `translate(${boardX}px, ${boardY}px) scale(${zoomLevel})`;
+        }
+        updateTransform();
+        
+        function changeZoom(delta) {
+            let oldZoom = zoomLevel;
+            zoomLevel += delta;
+            if(zoomLevel < 0.4) zoomLevel = 0.4;
+            if(zoomLevel > 2.0) zoomLevel = 2.0;
+            
+            let cx = window.innerWidth / 2;
+            let cy = window.innerHeight / 2;
+            boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+            boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+            updateTransform();
+        }
         
         let isPanning = false;
         let panStartX = 0, panStartY = 0;
@@ -186,7 +213,7 @@
             if(isPanning) {
                 boardX = e.clientX - panStartX;
                 boardY = e.clientY - panStartY;
-                board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+                updateTransform();
             }
         });
         document.addEventListener('mouseup', () => {
@@ -208,7 +235,7 @@
                 e.preventDefault(); 
                 boardX = e.touches[0].clientX - panStartX;
                 boardY = e.touches[0].clientY - panStartY;
-                board.style.transform = `translate(${boardX}px, ${boardY}px)`;
+                updateTransform();
             }
         }, {passive: false});
         document.addEventListener('touchend', () => { isPanning = false; });
@@ -224,13 +251,13 @@
             harubang: { name: '현무암 조각 공원', type: '3d', size: 2, img: 'harubang_processed.webp', desc: '현무암을 조각하여 만든 훌륭한 관광 자원', cost: { lava: 10, rock: 20 } },
             pond: { name: '부석 미니 연못', type: '3d', size: 2, img: 'pond_processed.png', desc: '가스가 빠져나가 구멍이 많은 가벼운 암석', cost: { gas: 15, rock: 5 } },
             oven: { name: '마그마 돌 화덕', type: '3d', size: 2, img: 'oven_processed.png', desc: '마그마의 뜨거운 열로 고구마를 구울 수 있는 화덕', cost: { lava: 15, rock: 5 } },
-            sand: { name: '검은 모래 해변 타일', type: 'tile', size: 2, emoji: '🏖️', desc: '현무암이 잘게 부서져 만들어진 모래', cost: { ash: 10, rock: 2 } },
+            sand: { name: '검은 모래 해변', type: '3d', size: 2, img: 'sand_processed.webp', desc: '현무암이 잘게 부서져 만들어진 검은 모래 해변', cost: { ash: 10, rock: 2 } },
             
             // Size 3
             farm: { name: '비옥한 화산재 농장', type: '3d', size: 3, img: 'farm_basic_processed.png', desc: '화산재가 흙에 섞여 땅을 걸름지게 함', cost: { ash: 25, lava: 5 } },
             castle: { name: '단단한 현무암 성곽', type: '3d', size: 3, img: 'castle_processed.webp', desc: '단단한 암석 조각들을 쌓아 만든 방어벽', cost: { lava: 20, rock: 25, ash: 5 } },
-            power: { name: '지열 발전소', type: '3d', size: 3, emoji: '🏭', desc: '마그마의 엄청난 열에너지로 전기를 생산', cost: { gas: 30, lava: 10 } },
-            crater: { name: '분화구 호수 타일', type: 'tile', size: 3, emoji: '💧', desc: '분화구(마그마가 나온 구멍)에 물이 고임', cost: { ash: 5, rock: 5, gas: 5 } },
+            power: { name: '지열 발전소', type: '3d', size: 3, img: 'power_processed.webp', desc: '마그마의 엄청난 열에너지로 전기를 생산', cost: { gas: 30, lava: 10 } },
+            crater: { name: '분화구 호수', type: '3d', size: 3, img: 'crater_processed.webp', desc: '분화구(마그마가 나온 구멍)에 맑은 물이 고인 호수', cost: { ash: 5, rock: 5, gas: 5 } },
             garden: { name: '화산재 텃밭 타일', type: 'tile', size: 3, emoji: '🌱', desc: '화산 분출물 중 고체인 화산재 활용', cost: { ash: 15, gas: 5 } }
         };
 
@@ -545,8 +572,8 @@
                 shadow.style.opacity = '0.6';
                 shadow.style.pointerEvents = 'none';
                 
-                let cx = (window.innerWidth / 2) - boardX;
-                let cy = (window.innerHeight / 2) - boardY;
+                let cx = (window.innerWidth / 2 - boardX) / zoomLevel;
+                let cy = (window.innerHeight / 2 - boardY) / zoomLevel;
                 
                 let initX = Math.round((cx - shadow.offsetWidth/2) / 30) * 30;
                 let initY = Math.round((cy - shadow.offsetHeight/2) / 30) * 30;
@@ -561,8 +588,10 @@
 
         document.getElementById('viewport').addEventListener('mousemove', (e) => {
             if(shadow) {
-                let x = Math.round((e.clientX - boardX - shadow.offsetWidth/2)/30)*30;
-                let y = Math.round((e.clientY - boardY - shadow.offsetHeight/2)/30)*30;
+                let bx = (e.clientX - boardX) / zoomLevel;
+                let by = (e.clientY - boardY) / zoomLevel;
+                let x = Math.round((bx - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((by - shadow.offsetHeight/2)/30)*30;
                 shadow.style.left = x + 'px';
                 shadow.style.top = y + 'px';
                 updateYSorting(shadow);
@@ -581,8 +610,10 @@
                 shadow.style.opacity = '1';
                 shadow.style.pointerEvents = 'auto';
                 
-                let x = Math.round((e.clientX - boardX - shadow.offsetWidth/2)/30)*30;
-                let y = Math.round((e.clientY - boardY - shadow.offsetHeight/2)/30)*30;
+                let bx = (e.clientX - boardX) / zoomLevel;
+                let by = (e.clientY - boardY) / zoomLevel;
+                let x = Math.round((bx - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((by - shadow.offsetHeight/2)/30)*30;
                 shadow.style.left = x + 'px';
                 shadow.style.top = y + 'px';
                 updateYSorting(shadow);
@@ -626,7 +657,7 @@
         
         window.addEventListener('mousemove', (e) => {
             if(!draggingEl) return;
-            let dx = e.clientX - startX; let dy = e.clientY - startY;
+            let dx = (e.clientX - startX) / zoomLevel; let dy = (e.clientY - startY) / zoomLevel;
             draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
             draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
         });
@@ -644,7 +675,7 @@
         
         window.addEventListener('touchmove', (e) => {
             if(!draggingEl) return;
-            let dx = e.touches[0].clientX - startX; let dy = e.touches[0].clientY - startY;
+            let dx = (e.touches[0].clientX - startX) / zoomLevel; let dy = (e.touches[0].clientY - startY) / zoomLevel;
             draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
             draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
         }, {passive:false});
