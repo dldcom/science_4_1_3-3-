@@ -27,7 +27,7 @@
 
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20000; }
         
-        #inventory { position: absolute; top: 15px; left: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 20px; display: flex; flex-wrap: wrap; gap: 10px; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; }
+        #inventory { position: absolute; top: 15px; left: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 20px; display: flex; flex-wrap: nowrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; }
         .inv-item { display: flex; align-items: center; font-size: 16px; font-weight: bold; background: #eee; padding: 4px 10px; border-radius: 10px; }
         .inv-item img, .inv-item span.icon { width: 25px; height: 25px; margin-right: 5px; font-size: 20px; line-height: 25px; display: inline-block; text-align: center; }
         
@@ -168,11 +168,9 @@
                 <div class="inv-item" onclick="showResInfo('lava', '용암', '화산 분출물 중 액체 상태입니다. 마그마가 지표로 흘러나온 것으로, 식으면 암석이 됩니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="lava_processed.webp">용암: <span id="inv-lava">0</span></div>
                 <div class="inv-item" onclick="showResInfo('ash', '화산재', '화산 분출물 중 고체 상태입니다. 아주 작은 알갱이로 바람을 타고 멀리 날아갈 수 있으며, 나중에는 땅을 비옥하게 합니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="ash_processed.webp">화산재: <span id="inv-ash">0</span></div>
                 <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
-                <div class="inv-item" title="수확한 고구마"><span class="icon">🍠</span>고구마: <span id="inv-potato">0</span></div>
-                <div class="inv-item" title="황금 물고구마 (분화구 호수에서 획득)"><span class="icon">✨🍠</span>황금: <span id="inv-golden_potato">0</span></div>
-                <div style="width:100%; font-size:12px; color:#555; margin-top:-5px; text-align:center;">💡 군고구마를 클릭하면 바닥에 떨어뜨립니다.</div>
-                <div class="inv-item" title="용암 군고구마" onclick="dropItem('roasted')" style="cursor:pointer; border: 2px solid #FF9800;"><span class="icon">🍕</span>군고구마: <span id="inv-roasted">0</span></div>
-                <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span>관광객: <span id="inv-tourists">0</span></div>
+                <div class="inv-item" title="고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
+                <div class="inv-item" title="용암 군고구마 (클릭하면 바닥에 떨어뜨립니다)" onclick="dropItem('roasted')" style="cursor:pointer; border: 2px solid #FF9800;"><span class="icon">🍕</span><span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
             </div>
             
             <div id="medals-container"></div>
@@ -982,8 +980,6 @@
             }
         }
         
-        document.getElementById('inv-golden_potato').parentElement.onclick = () => dropItem('golden_potato');
-        document.getElementById('inv-golden_potato').parentElement.style.cursor = 'pointer';
 
         function spawnDroppedItem(emoji, type) {
             const cx = (window.innerWidth / 2 - boardX) / zoomLevel;
