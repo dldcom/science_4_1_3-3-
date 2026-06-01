@@ -13,6 +13,7 @@
         
         #volcano { position: absolute; left: 1500px; top: 1500px; transform: translate(-50%, -50%); width: 150px; height: 150px; background: url('volcano_processed.webp') no-repeat center/contain; cursor: pointer; z-index: 10; transition: transform 0.1s; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
         #volcano:active { transform: translate(-50%, -50%) scale(0.95); }
+        #volcano.cooldown { filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)) grayscale(100%); cursor: not-allowed; opacity: 0.85; }
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-55%, -45%) rotate(-5deg); } 50% { transform: translate(-45%, -55%) rotate(5deg); } 75% { transform: translate(-55%, -55%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
 
@@ -56,25 +57,204 @@
         .quest-title { color: #E6C229; margin-bottom: 3px; font-size: 14px; }
         .quest-item.done .quest-title { color: #28a745; }
 
-        .modal-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 30000; display: none; justify-content: center; align-items: center; pointer-events: auto; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .modal-content h2 { color: #FF5722; margin-bottom: 20px; word-break: keep-all; font-size: 22px; }
-        .quiz-option { display: block; width: 100%; padding: 12px; margin: 10px 0; font-size: 18px; border: 2px solid #2196F3; background: #E3F2FD; border-radius: 12px; font-weight: bold; transition: all 0.2s; }
-        .quiz-option:active { background: #2196F3; color: white; }
-        .close-btn { margin-top: 15px; padding: 10px 25px; background: #9e9e9e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
+        /* 공통 모달 배경 스타일 */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 30000;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
 
-        .dict-entry { background: #f3e5f5; border-left: 5px solid #9C27B0; padding: 15px; margin-bottom: 10px; text-align: left; font-size: 16px; font-weight: bold; line-height: 1.4; }
+        /* 공통 모달 콘텐츠 스타일 */
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            border: 6px solid #000;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            box-sizing: border-box;
+            animation: bounceInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        @keyframes bounceInModal {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 공통 닫기 버튼 스타일 */
+        .close-btn {
+            background: #FF5722;
+            color: white;
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            margin-top: 15px;
+            transition: all 0.1s;
+        }
+        .close-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        /* 1. 퀴즈 문제 창 UI 개선 (더 감각적이고 두꺼운 테두리 및 그림자) */
+        #quiz-modal .modal-content {
+            border: 8px solid #FF5722;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFF9F6;
+            width: 580px; /* 퀴즈창 가로로 더 키움 */
+            max-width: 95%;
+        }
+
+        /* 퀘스트 도착 모달 스타일 */
+        #quest-alert-modal .modal-content {
+            border: 8px solid #E6C229;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFFAEE;
+            width: 540px;
+            max-width: 95%;
+        }
+
+        /* 퀘스트 완료 모달 스타일 */
+        #quest-complete-modal .modal-content {
+            border: 8px solid #28a745;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #F0FDF4;
+            width: 540px;
+            max-width: 95%;
+        }
+
+        /* 2. 문제 글씨 크기 키우기 */
+        #quiz-q {
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1.4;
+            color: #E64A19 !important;
+            margin-bottom: 25px;
+            word-break: keep-all;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        /* 2. 선택지 버튼 크기 줄이기 및 감각적인 스타일 */
+        #quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            background: #FFF;
+            border: 4px solid #000;
+            border-radius: 14px;
+            padding: 10px 16px; /* 버튼 크기 줄임 */
+            font-size: 16px;     /* 버튼 글씨 크기 줄임 */
+            font-weight: 800;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            transition: all 0.1s;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+            margin: 0;
+        }
+
+        .quiz-option:hover {
+            background: #E3F2FD;
+            border-color: #2196F3;
+            color: #0D47A1;
+        }
+
+        .quiz-option:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
 
         
         /* 건물/강아지 관련 스타일 */
-        #building-modal .modal-content { display: flex; flex-direction: column; gap: 10px; }
-        .building-action-btn { padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.1s; display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
-        .building-action-btn:active { transform: scale(0.95); }
+        #building-modal .modal-content {
+            border: 8px solid #FF5722;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFF;
+            width: 540px;
+            max-width: 90%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .building-action-btn { 
+            padding: 16px; 
+            background: #4CAF50; 
+            color: white; 
+            border: 4px solid #000; 
+            border-radius: 14px; 
+            font-size: 20px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            display: block; 
+            width: 100%; 
+            box-sizing: border-box; 
+            margin-bottom: 8px;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .building-action-btn:active { 
+            transform: translate(2px, 2px); 
+            box-shadow: 2px 2px 0 #000;
+        }
         .building-action-btn.move-btn { background: #2196F3; }
         .building-action-btn.demo-btn { background: #f44336; }
-        .building-action-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .top-right-btn { width: 40px; height: 40px; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.1s; display: flex; justify-content: center; align-items: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .top-right-btn:active { transform: scale(0.9); box-shadow: 0 0 2px rgba(0,0,0,0.2); }
+        .building-action-btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            transform: none; 
+            border-color: #777;
+        }
+        .top-right-btn {
+            width: 54px;
+            height: 40px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 3px 3px 0 #000;
+        }
+        .top-right-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 #000;
+        }
         .top-right-btn.move-btn { background: #2196F3; }
         .top-right-btn.demo-btn { background: #f44336; }
 
@@ -151,8 +331,19 @@
         /* 특수 기능 효과 */
         .oven-fire { position: absolute; bottom: 0; font-size: 40px; animation: flicker 0.5s infinite alternate; pointer-events: none; display: none; }
         @keyframes flicker { 0% { opacity: 0.8; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+        @keyframes floatAndBounce {
+            0% { transform: translate(-50%, 0) scale(0.95); }
+            100% { transform: translate(-50%, -8px) scale(1.05); }
+        }
+        @keyframes craterGoldFloat {
+            0% { transform: translate(-50%, -50%) scale(0.85); filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); }
+            100% { transform: translate(-50%, -75%) scale(1.25); filter: drop-shadow(0 0 30px rgba(255,215,0,1)) drop-shadow(0 0 8px #fff); }
+        }
 
-        #alert-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; z-index: 40000; opacity: 0; pointer-events: none; transition: opacity 0.4s; text-align: center; line-height: 1.4; }
+        #alert-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; z-index: 40000; opacity: 0; pointer-events: none; transition: opacity 0.4s; text-align: center; line-height: 1.4; background: rgba(0, 0, 0, 0.85); padding: 15px 30px; border-radius: 20px; border: 4px solid #fff; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); }
+        #alert-text.success { background: rgba(46, 125, 50, 0.95) !important; border-color: #A5D6A7 !important; }
+        #alert-text.error { background: rgba(198, 40, 40, 0.95) !important; border-color: #EF9A9A !important; }
+        #alert-text.info { background: rgba(0, 0, 0, 0.85) !important; border-color: #fff !important; }
         
         /* 훈장 표시기 */
         #medals-container { position: absolute; top: 130px; left: 15px; display: flex; gap: 5px; font-size: 30px; pointer-events: none; z-index: 20000;}
@@ -196,7 +387,7 @@
                 <div class="inv-item" onclick="showResInfo('ash', '화산재', '화산 분출물 중 고체 상태입니다. 아주 작은 알갱이로 바람을 타고 멀리 날아갈 수 있으며, 나중에는 땅을 비옥하게 합니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="ash_processed.webp">화산재: <span id="inv-ash">0</span></div>
                 <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
                 <div class="inv-item" title="고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
-                <div class="inv-item" title="용암 군고구마 (클릭하면 바닥에 떨어뜨립니다)" onclick="dropItem('roasted')" style="cursor:pointer; border: 2px solid #FF9800;"><span class="icon">🍕</span><span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="용암 군고구마"><span class="icon">🍕</span><span id="inv-roasted">0</span></div>
                 <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
             </div>
             
@@ -220,25 +411,25 @@
             </div>
         </div>
         
-        <div id="quest-alert-modal" class="modal-bg" style="z-index: 45000; align-items: flex-start; padding-top: 100px;">
-            <div class="modal-content" style="max-width: 450px; border: 4px solid #E6C229; background: #FFFAEE; box-shadow: 0 10px 30px rgba(230, 194, 41, 0.4);">
-                <h2 style="color: #FF9800; font-size: 28px; margin-bottom: 15px; border-bottom: 2px solid #E6C229; padding-bottom: 10px;">📜 새로운 퀘스트 도착!</h2>
-                <div id="quest-alert-title" style="font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #D84315;">퀘스트 제목</div>
-                <div id="quest-alert-desc" style="font-size: 18px; color: #555; margin-bottom: 25px; line-height: 1.5; font-weight: bold;">퀘스트 설명</div>
-                <button class="close-btn" style="background: #FF9800; color: white; padding: 12px 30px; font-size: 18px;" onclick="document.getElementById('quest-alert-modal').style.display='none'; updateUI();">수락하기</button>
+        <div id="quest-alert-modal" class="modal-bg" style="display: none;">
+            <div class="modal-content">
+                <h2 style="color: #E6C229; font-size: 32px; font-weight: 900; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">📜 새로운 퀘스트 도착!</h2>
+                <div id="quest-alert-title" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #D84315;">퀘스트 제목</div>
+                <div id="quest-alert-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold; background: #FFFDE7; border: 3px dashed #E6C229; padding: 15px; border-radius: 12px;">퀘스트 설명</div>
+                <button class="close-btn" style="background: #E6C229; color: white; width: 100%; font-size: 20px; font-weight: 900; padding: 12px;" onclick="document.getElementById('quest-alert-modal').style.display='none'; updateUI();">수락하기</button>
             </div>
         </div>
         
-        <div id="quest-complete-modal" class="modal-bg" style="z-index: 46000; align-items: flex-start; padding-top: 100px; display: none;">
-            <div class="modal-content" style="max-width: 450px; border: 4px solid #28a745; background: #f0fdf4; box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);">
-                <h2 style="color: #28a745; font-size: 28px; margin-bottom: 15px; border-bottom: 2px solid #28a745; padding-bottom: 10px;">🎉 퀘스트 완료!</h2>
-                <div id="quest-complete-title" style="font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #155724;">퀘스트 제목</div>
-                <div id="quest-complete-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold;">보상 내용</div>
-                <button class="close-btn" style="background: #28a745; color: white; padding: 12px 30px; font-size: 18px;" onclick="closeQuestComplete()">확인</button>
+        <div id="quest-complete-modal" class="modal-bg" style="display: none;">
+            <div class="modal-content">
+                <h2 style="color: #28a745; font-size: 32px; font-weight: 900; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">🎉 퀘스트 완료!</h2>
+                <div id="quest-complete-title" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #155724;">퀘스트 제목</div>
+                <div id="quest-complete-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold; background: #E8F5E9; border: 3px dashed #28a745; padding: 15px; border-radius: 12px;">보상 내용</div>
+                <button class="close-btn" style="background: #28a745; color: white; width: 100%; font-size: 20px; font-weight: 900; padding: 12px;" onclick="closeQuestComplete()">확인</button>
             </div>
         </div>
         
-        <div id="quiz-modal" class="modal-bg">
+        <div id="quiz-modal" class="modal-bg" style="display: none;">
             <div class="modal-content">
                 <h2 id="quiz-q">질문</h2>
                 <div id="quiz-options"></div>
@@ -246,7 +437,7 @@
             </div>
         </div>
         
-        <div id="res-info-modal" class="modal-bg" style="z-index: 35000;" onclick="this.style.display='none'">
+        <div id="res-info-modal" class="modal-bg" style="display: none; z-index: 35000;" onclick="this.style.display='none'">
             <div class="modal-content" style="max-width: 400px; padding: 20px;" onclick="event.stopPropagation()">
                 <div style="font-size: 50px; margin-bottom: 10px;" id="res-info-icon"></div>
                 <h2 id="res-info-title" style="margin: 0 0 10px 0; color: #FF5722; font-size: 24px;">이름</h2>
@@ -256,28 +447,22 @@
         </div>
         
         
-        <div id="building-modal" class="modal-bg" style="z-index: 35000;" onclick="closeBuildingModal()">
-            <div class="modal-content" style="max-width: 320px; padding: 20px; position: relative;" onclick="event.stopPropagation()">
-                <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;">
+        <div id="building-modal" class="modal-bg" style="display: none; z-index: 35000;" onclick="closeBuildingModal()">
+            <div class="modal-content" style="position: relative;" onclick="event.stopPropagation()">
+                <div style="position: absolute; top: 25px; right: 25px; display: flex; gap: 8px;">
                     <button class="top-right-btn move-btn" onclick="moveCurrentBuilding()">이동</button>
                     <button class="top-right-btn demo-btn" onclick="demolishCurrentBuilding()">철거</button>
                 </div>
-                <div style="font-size: 50px; margin-bottom: 5px;" id="bm-icon"></div>
-                <h2 id="bm-title" style="margin: 0 0 5px 0; color: #FF5722; font-size: 22px; padding-right: 80px; word-break: keep-all;">이름</h2>
-                <div id="bm-desc" style="font-size: 14px; color: #555; margin-bottom: 15px; word-break: keep-all; line-height: 1.3;">설명</div>
-                <div id="bm-custom-ui"></div>
+                <div style="font-size: 70px; margin-bottom: 15px;" id="bm-icon"></div>
+                <h2 id="bm-title" style="margin: 0 0 10px 0; color: #FF5722; font-size: 32px; font-weight: 900; word-break: keep-all; text-shadow: 1px 1px 0px rgba(0,0,0,0.1); padding-right: 130px;">이름</h2>
+                <div id="bm-desc" style="font-size: 18px; color: #555; margin-bottom: 20px; word-break: keep-all; line-height: 1.5; font-weight: bold; background: #f5f5f5; padding: 15px; border-radius: 12px; border: 3px dashed #ccc;">설명</div>
+                <div id="bm-custom-ui" style="margin-bottom: 20px; width: 100%;"></div>
+                
+                <button class="close-btn" style="width: 100%; margin-top: 15px; font-size: 18px; font-weight: 900; background: #757575; color: white; border: 4px solid #000; box-shadow: 4px 4px 0 #000;" onclick="closeBuildingModal()">닫기</button>
             </div>
         </div>
 
-        <div id="dict-modal" class="modal-bg">
-            <div class="modal-content">
-                <h2>📖 나의 화산 도감</h2>
-                <div id="dict-content" style="max-height: 40vh; overflow-y: auto;">
-                    <div style="color:#666;">아직 해금된 도감이 없습니다. 퀘스트를 완료해보세요!</div>
-                </div>
-                <button class="close-btn" onclick="document.getElementById('dict-modal').style.display='none'">닫기</button>
-            </div>
-        </div>
+
 
         <div id="instructions-modal" class="modal-bg" style="display: flex; z-index: 50000;">
             <div class="modal-content" style="max-width: 600px; padding: 40px; border: 8px solid #000; border-radius: 24px; box-shadow: 12px 12px 0px #000; background-color: #FFF;">
@@ -296,11 +481,12 @@
     </div>
 
     <script>
-        const inventory = { gas: 200, lava: 200, ash: 200, rock: 200, potato: 0, roasted: 0, golden_potato: 0, tourists: 0 };
+        const inventory = { gas: 0, lava: 0, ash: 0, rock: 0, potato: 0, roasted: 0, golden_potato: 0, tourists: 0 };
         const resTypes = ['gas', 'lava', 'ash', 'rock'];
         
         let placedBuildings = [];
         let quizzesAnswered = 0;
+        let currentQuiz = null;
         let dayTick = 0; 
         
         // Panning logic
@@ -356,6 +542,7 @@
 
         // Wheel zoom logic
         document.getElementById('viewport').addEventListener('wheel', (e) => {
+            if (e.target.closest('#shop') || e.target.closest('#quest-panel') || e.target.closest('.modal-content')) return;
             let oldZoom = zoomLevel;
             let zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
             zoomLevel *= zoomFactor;
@@ -444,23 +631,48 @@
             farm: { name: '비옥한 화산재 농장', type: '3d', size: 3, img: 'farm_basic_processed.webp', desc: '화산재가 흙에 섞여 땅을 걸름지게 함', cost: { ash: 25, lava: 5 } },
             castle: { name: '단단한 현무암 성곽', type: '3d', size: 3, img: 'castle_processed.webp', desc: '단단한 암석 조각들을 쌓아 만든 방어벽', cost: { lava: 20, rock: 25, ash: 5 } },
             power: { name: '지열 발전소', type: '3d', size: 3, img: 'power_processed.webp', desc: '마그마의 엄청난 열에너지로 전기를 생산', cost: { gas: 30, lava: 10 } },
-            crater: { name: '분화구 호수', type: '3d', size: 3, img: 'crater_processed.webp', desc: '분화구(마그마가 나온 구멍)에 맑은 물이 고인 호수', cost: { ash: 5, rock: 5, gas: 5 } },
-            garden: { name: '화산재 텃밭 타일', type: 'tile', size: 3, emoji: '🌱', desc: '화산 분출물 중 고체인 화산재 활용', cost: { ash: 15, gas: 5 } }
+            crater: { name: '분화구 호수', type: '3d', size: 3, img: 'crater_processed.webp', desc: '분화구(마그마가 나온 구멍)에 맑은 물이 고인 호수', cost: { ash: 5, rock: 5, gas: 5 } }
         };
 
         const quests = [
-            { id: 'q1', title: '화산의 쉼터', desc: '온천 1개 건설', condition: () => countB('hot') >= 1, done: false, dict: '온천은 마그마에 데워진 솟아나는 물로, 피로를 풀어주고 훌륭한 관광 자원이 됩니다.' },
-            { id: 'q5', title: '척척박사 전문가', desc: '화산 퀴즈 3번 정답', condition: () => quizzesAnswered >= 3, done: false, medal: '🎓', dict: '화산 분출물에는 기체(화산가스), 액체(용암), 고체(화산재, 화산 암석 조각) 3가지 상태가 모두 존재합니다.' },
-            { id: 'q2', title: '비옥한 땅의 비밀', desc: '농장에서 고구마 3개 수확', condition: () => inventory.potato >= 3, done: false, dict: '화산재는 초기엔 피해를 주지만, 시간이 지나면 땅을 매우 걸름지게(비옥하게) 만들어 농사가 잘 되게 해줘요.' },
-            { id: 'q3', title: '지구의 끓는 피', desc: '화덕에서 군고구마 1번 굽기', condition: () => inventory.roasted >= 1, done: false, dict: '마그마의 엄청난 열기는 지열 발전으로 전기를 만들거나 요리에 활용할 수 있는 소중한 에너지입니다.' },
-            { id: 'q4', title: '화산 마을의 인기', desc: '관광객 누적 10명 방문', condition: () => inventory.tourists >= 10, done: false, medal: '🏅', dict: '주상절리나 분화구 등 독특한 화산 지형은 세계적인 관광 명소가 되어 사람들을 끌어모읍니다.' }
+            { id: 'q1', title: '구멍 숭숭 현무암 돌담', desc: '현무암 돌담 2개 건설하기', condition: () => countB('wall') >= 2, done: false, dict: '현무암은 마그마가 지표 부근에서 식어 만들어지며 어두운색에 가스가 빠져나간 구멍이 뚫려 있기도 합니다.' },
+            { id: 'q2', title: '신비로운 육각 기둥', desc: '주상절리 육각 기둥 1개 건설하기', condition: () => countB('pillar') >= 1, done: false, dict: '용암이 빠르게 식으면서 수축하여 육각형 기둥 모양으로 갈라져 단단하게 굳어진 지형을 주상절리라고 합니다.' },
+            { id: 'q3', title: '피로를 풀어주는 물', desc: '천연 화산 온천 1개 건설하기', condition: () => countB('hot') >= 1, done: false, dict: '지하수가 땅속 깊은 마그마의 뜨거운 열기에 의해 데워져 솟아나는 것을 온천이라고 부릅니다.' },
+            { id: 'q4', title: '풍요를 품은 화산재', desc: '비옥한 화산재 농장 1개 건설하기', condition: () => countB('farm') >= 1, done: false, dict: '화산재는 초기엔 시야를 가리거나 식물에 해를 입히기도 하지만, 시간이 지나면 흙을 비옥하게 만들어 농사가 잘되도록 돕습니다.' },
+            { id: 'q5', title: '지구의 뜨거운 화덕', desc: '마그마 돌 화덕 1개 건설하기', condition: () => countB('oven') >= 1, done: false, dict: '마그마의 강력하고 풍부한 열기는 지열 에너지를 이용한 요리나 친환경 발전에 널리 쓰일 수 있습니다.' },
+            { id: 'q6', title: '물에 뜨는 신기한 돌', desc: '부석 미니 연못 1개 건설하기', condition: () => countB('pond') >= 1, done: false, dict: '용암이 식으면서 많은 양의 가스가 한꺼번에 빠져나가 구멍이 가득 차고 가벼워 물에 뜨는 암석을 부석이라고 합니다.' },
+            { id: 'q7', title: '지구가 주는 엄청난 전기', desc: '지열 발전소 1개 건설하기', condition: () => countB('power') >= 1, done: false, dict: '화산 주변 땅속 깊은 마그마의 엄청난 열을 이용해 친환경적인 전기를 생산하는 방식을 지열 발전이라고 합니다.' },
+            { id: 'q8', title: '천지와 백록담의 전설', desc: '분화구 호수 1개 건설하기', condition: () => countB('crater') >= 1, done: false, dict: '화산 꼭대기에 마그마가 뿜어져 나왔던 웅덩이(분화구)에 오랜 시간 물이 고여 백두산 천지나 한라산 백록담 같은 호수가 생겨납니다.' },
+            { id: 'q9', title: '세계적인 관광 명소', desc: '누적 관광객 15명 달성하기', condition: () => inventory.tourists >= 15, done: false, medal: '🥈', dict: '주상절리나 온천, 분화구 호수 등 화산 활동으로 형성된 지형들은 매우 아름다워 사람들이 많이 찾는 훌륭한 관광 명소가 됩니다.' },
+            { id: 'q10', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' }
         ];
 
         const questions = [
             { q: "땅속 깊은 곳에서 암석이 녹은 물질은 무엇일까요?", opts: ["화산 가스", "마그마", "지하수", "화산재"], a: 1, exp: "마그마는 땅속 깊은 곳에 있는 암석이 높은 열에 의해 녹아 있는 물질입니다." },
+            { q: "화산 활동으로 나오는 물질 중 액체 상태인 것은 무엇일까요?", opts: ["화산 가스", "화산재", "용암", "화산 암석 조각"], a: 2, exp: "용암은 마그마가 지표면으로 흘러나온 액체 상태의 물질입니다." },
             { q: "화산 활동으로 나오는 기체로, 대부분 수증기로 이루어진 것은?", opts: ["산소", "이산화 탄소", "화산 가스", "질소"], a: 2, exp: "화산 가스는 화산 폭발 시 나오는 기체 분출물입니다." },
-            { q: "마그마가 지표면을 흐르는 것으로, 굳어지면 암석이 되는 것은?", opts: ["용암", "화산재", "지하수", "온천수"], a: 0, exp: "용암은 마그마가 땅 위로 분출하여 가스가 빠져나가고 남은 액체 물질입니다." },
-            { q: "화산 분출물 중 크기가 매우 작고, 땅을 비옥하게 만들어주는 고체 물질은?", opts: ["화산 암석 조각", "마그마", "화산 가스", "화산재"], a: 3, exp: "화산재는 고체 분출물 중 아주 작고 가벼운 가루 형태입니다." }
+            { q: "화산 활동으로 나오는 물질 중 고체 상태로 크기가 가장 작은 것은 무엇일까요?", opts: ["화산재", "용암", "화산 가스", "마그마"], a: 0, exp: "화산재는 고체 분출물 중 크기가 매우 작고 가벼운 물질입니다." },
+            { q: "화산 꼭대기에 움푹 파여 물이 고이기도 하는 곳을 무엇이라고 할까요?", opts: ["분화구", "온천", "계곡", "지하수"], a: 0, exp: "화산 꼭대기에 움푹 파인 곳을 분화구라고 하며, 이곳에 물이 고여 호수가 생기기도 합니다." },
+            { q: "마그마가 식어서 만들어진 암석을 무엇이라고 부를까요?", opts: ["퇴적암", "화성암", "변성암", "이암"], a: 1, exp: "마그마가 식어 만들어진 암석을 화성암이라고 합니다." },
+            { q: "색깔이 어둡고 표면에 구멍이 뚫려 있기도 한 암석은 무엇일까요?", opts: ["화강암", "현무암", "대리암", "사암"], a: 1, exp: "현무암은 마그마가 지표 근처에서 식어 만들어지며, 색이 어둡고 구멍이 뚫려 있기도 합니다." },
+            { q: "땅속 깊은 곳에서 마그마가 천천히 식어 만들어져, 알갱이 크기가 크고 색깔이 밝은 암석은?", opts: ["현무암", "진흙", "화강암", "모래"], a: 2, exp: "화강암은 땅속 깊은 곳에서 마그마가 식어 만들어지며, 밝은 색을 띠고 알갱이 크기가 큽니다." },
+            { q: "현무암에 구멍이 뚫려 있는 이유는 마그마가 식으면서 무엇이 빠져나갔기 때문일까요?", opts: ["가스", "물", "화산재", "공기"], a: 0, exp: "현무암은 마그마가 식는 과정에서 가스가 빠져나가면서 구멍이 생기기도 합니다." },
+            { q: "화산재는 하늘 높이 올라가 비행기의 운항을 어렵게 하기도 한다.", opts: ["O", "X"], a: 0, exp: "화산재는 시야를 가리고 비행기 엔진에 들어가 비행을 방해할 수 있습니다." },
+            { q: "화산 활동으로 흐르는 용암은 산불을 일으킬 수 있다.", opts: ["O", "X"], a: 0, exp: "뜨거운 용암이 지표면을 흐르면서 나무에 불을 붙여 산불이 나기도 합니다." },
+            { q: "화산 가스는 사람들의 호흡을 돕고 건강하게 해준다.", opts: ["O", "X"], a: 1, exp: "화산 가스는 사람들의 호흡을 어렵게 하고 건강에 해로울 수 있습니다." },
+            { q: "화산재가 쌓인 땅은 식물이 자랄 수 없는 죽은 땅이 된다.", opts: ["O", "X"], a: 1, exp: "시간이 지나면 화산재는 오히려 땅을 비옥하게 만들어 농작물이 잘 자라게 돕습니다." },
+            { q: "화산 주변 땅속의 뜨거운 열을 이용해 지열 발전을 할 수 있다.", opts: ["O", "X"], a: 0, exp: "화산 주변 땅속의 뜨거운 열을 전기로 바꾸는 지열 발전이 가능합니다." },
+            { q: "화산 활동으로 만들어진 독특한 지형은 사람들이 많이 찾는 관광지가 될 수 있다.", opts: ["O", "X"], a: 0, exp: "주상절리나 온천, 분화구 호수 등은 훌륭한 관광 자원이 됩니다." },
+            { q: "땅속의 마그마가 지표로 뿜어져 나와서 만들어진 산을 무엇이라고 부를까요?", opts: ["지진", "화산", "빙하", "계곡"], a: 1, exp: "마그마가 지표로 분출하여 쌓이면서 화산이 만들어집니다." },
+            { q: "화산 분출물 중에서 크고 작은 돌덩어리로 이루어진 고체 물질은 무엇일까요?", opts: ["화산 가스", "용암", "화산재", "화산 암석 조각"], a: 3, exp: "화산 암석 조각은 화산이 폭발할 때 뿜어져 나오는 크고 작은 돌덩어리입니다." },
+            { q: "현무암과 화강암 중에서 우리나라의 제주도나 울릉도에서 흔하게 볼 수 있는 암석은 무엇일까요?", opts: ["현무암", "화강암", "대리암", "사암"], a: 0, exp: "제주도와 울릉도는 화산 활동으로 만들어진 섬이라 현무암을 흔히 볼 수 있습니다." },
+            { q: "화강암을 이루고 있는 알갱이들은 눈으로 구별할 수 있을 정도로 크다.", opts: ["O", "X"], a: 0, exp: "화강암은 땅속 깊은 곳에서 마그마가 아주 천천히 식기 때문에 알갱이가 커집니다." },
+            { q: "현무암과 화강암 중에서 색깔이 더 밝은 암석은 무엇일까요?", opts: ["현무암", "화강암"], a: 1, exp: "화강암은 밝은 색을 띠는 알갱이들이 많이 포함되어 있어 전체적으로 밝습니다." },
+            { q: "현무암은 마그마가 주로 어디에서 식어서 만들어진 암석일까요?", opts: ["지표면 근처", "땅속 아주 깊은 곳"], a: 0, exp: "현무암은 지표면 근처에서 마그마가 매우 빠르게 식으면서 만들어집니다." },
+            { q: "화산 폭발 시 뿜어져 나온 많은 양의 화산재는 햇빛을 가려 지구의 기온을 일시적으로 낮추기도 한다.", opts: ["O", "X"], a: 0, exp: "거대한 화산 폭발로 생긴 화산재 구름은 햇빛을 차단하여 기온을 낮출 수 있습니다." },
+            { q: "화산 활동으로 생긴 지형 중 따뜻한 물이 솟아나와 사람들이 목욕이나 휴식을 취할 수 있는 곳은?", opts: ["폭포", "빙하", "온천", "호수"], a: 2, exp: "땅속 마그마의 열기로 지하수가 데워져 솟아나는 곳을 온천이라고 합니다." },
+            { q: "화산 활동이 강하게 일어나면 산사태나 홍수가 발생할 수도 있다.", opts: ["O", "X"], a: 0, exp: "화산 꼭대기의 얼음이 녹아내리거나, 화산재가 비와 섞여 흘러내리면서 홍수나 산사태가 날 수 있습니다." },
+            { q: "화산 폭발 시 마을과 숲을 덮쳐 큰 불을 내거나 피해를 입힐 수 있는 뜨거운 액체 물질은?", opts: ["용암", "화산재", "지하수", "화산 암석 조각"], a: 0, exp: "뜨거운 용암은 매우 천천히 흐르더라도 지나는 길의 모든 것을 불태울 수 있습니다." }
         ];
 
         function countB(type) { return placedBuildings.filter(b => b.key === type).length; }
@@ -473,9 +685,14 @@
             renderQuests();
         }
 
-        function showAlert(msg) {
+        function showAlert(msg, type = 'info') {
             const al = document.getElementById('alert-text');
             al.innerHTML = msg;
+            
+            // 기존 테마 클래스 초기화
+            al.classList.remove('success', 'error', 'info');
+            al.classList.add(type);
+            
             al.style.opacity = 1;
             setTimeout(() => { al.style.opacity = 0; }, 2500);
         }
@@ -542,7 +759,7 @@
         setTimeout(() => {
             firstQuestDelayPassed = true;
             updateUI();
-        }, 60000);
+        }, 15000);
 
         function renderQuests() {
             const container = document.getElementById('quest-items');
@@ -553,8 +770,6 @@
                 return;
             }
             
-            let anyUnlocked = document.getElementById('dict-content').innerHTML.indexOf('dict-entry') !== -1;
-            
             let activeQuest = quests.find(q => !q.done);
             
             const completeModal = document.getElementById('quest-complete-modal');
@@ -563,22 +778,11 @@
             } else {
                 if (activeQuest && activeQuest.condition()) {
                     activeQuest.done = true;
-                    let rewardText = `📖 도감이 새롭게 해금되었습니다!`;
+                    let rewardText = `🎉 퀘스트를 완료하였습니다!`;
                     if(activeQuest.medal) {
                         rewardText += `<br>${activeQuest.medal} 훈장 획득!`;
-                        document.getElementById('medals-container').innerHTML += activeQuest.medal;
+                        // document.getElementById('medals-container').innerHTML += activeQuest.medal;
                     }
-                    
-                    if(!anyUnlocked) {
-                        document.getElementById('dict-content').innerHTML = '';
-                        anyUnlocked = true;
-                    }
-                    document.getElementById('dict-content').innerHTML += `
-                        <div class="dict-entry">
-                            <div style="color:#FF5722; font-size:14px;">[${activeQuest.title} 달성]</div>
-                            ${activeQuest.dict}
-                        </div>
-                    `;
                     
                     document.getElementById('quest-complete-title').innerText = activeQuest.title;
                     document.getElementById('quest-complete-desc').innerHTML = rewardText;
@@ -819,7 +1023,7 @@
         });
 
         document.getElementById('viewport').addEventListener('click', (e) => {
-            if(e.target.closest('#shop') || e.target.closest('#inventory') || e.target.closest('.modal-bg') || e.target.closest('#volcano') || e.target.closest('#quest-panel') || e.target.closest('#shop-toggle-btn') || e.target.closest('#dict-btn') || e.target.closest('#quest-toggle-btn')) return;
+            if(e.target.closest('#shop') || e.target.closest('#inventory') || e.target.closest('.modal-bg') || e.target.closest('#volcano') || e.target.closest('#quest-panel') || e.target.closest('#shop-toggle-btn') || e.target.closest('#quest-toggle-btn')) return;
 
             if(placingType && shadow) {
                 if (checkOverlap(shadow)) {
@@ -955,7 +1159,7 @@
             const item = items[key];
             const bData = placedBuildings.find(b => b.el === el);
             
-            document.getElementById('bm-icon').innerHTML = item.img ? `<img src="${item.img}" style="width:50px;height:50px;">` : item.emoji;
+            document.getElementById('bm-icon').innerHTML = item.img ? `<img src="${item.img}" style="width:120px;height:120px;object-fit:contain;">` : `<span style="font-size:110px;line-height:1.2;">${item.emoji}</span>`;
             document.getElementById('bm-title').innerText = item.name + (bData.upgraded ? " (업그레이드됨)" : "");
             document.getElementById('bm-desc').innerText = item.desc;
             
@@ -969,7 +1173,7 @@
             else if (key === 'pond') extraDesc = `📌 <b>수분 공급 (수동)</b><br>10초 동안 주변에 화산 가스를 집중적으로 스폰시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('pond')">💧 가스 스폰 시작</button>`;
             else if (key === 'oven') extraDesc = `📌 <b>군고구마 굽기 (수동)</b><br>고구마 1개를 뜨거운 열기로 10초간 구워 군고구마를 만듭니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('oven')" ${bData.baking ? 'disabled' : ''}>🔥 고구마 굽기</button>`;
             else if (key === 'sand') extraDesc = `📌 <b>조개 줍기 (패시브)</b><br>20초마다 해변 주변에 조개 대신 무작위 자원이 스폰됩니다.`;
-            else if (key === 'castle') extraDesc = `📌 <b>강아지 기사단 (패시브)</b><br>군고구마 냄새를 맡고 온 일반 강아지(🐶)가 성곽에 닿으면 투구를 쓴 기사(⚔️)로 변신해 바닥의 자원을 대신 주워옵니다!`;
+            else if (key === 'castle') extraDesc = `📌 <b>강아지 기사단 (수동)</b><br>맛있는 군고구마를 사용하여 지나가는 일반 강아지(🐶)를 유인해 ⚔️ 투구를 쓴 기사로 진화시킵니다!<br><br><button class="building-action-btn" onclick="triggerBuildingAction('castle_feed')">🍕 군고구마 1개 사용</button>`;
             else if (key === 'crater') extraDesc = `📌 <b>신비한 작용 (수동)</b><br>용암을 소비해 자원을 폭발시키거나 고구마를 황금으로 진화시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('crater_fuse')" style="background:#9C27B0; margin-bottom:8px;">🌊 풍요의 호수 폭발 (용암 10)</button><button class="building-action-btn" onclick="triggerBuildingAction('crater_gold')" style="background:#E6C229; color:black;">✨ 황금 고구마 진화 (고구마 1)</button>`;
             else if (key === 'farm') {
                 extraDesc = `📌 <b>고구마 농사 (패시브)</b><br>시간이 지날 때마다 자동으로 고구마를 수확합니다.`;
@@ -1045,23 +1249,84 @@
                     inventory.potato--; updateUI(); bData.baking = true; closeBuildingModal();
                     showAlert("✨ 30초 뒤 황금 물고구마가 완성됩니다!");
                     el.style.filter = 'drop-shadow(0 0 20px #FFD700)';
+                    
+                    // 진화 중임을 보여주는 귀여운 둥둥 뜨는 반짝이 이모티콘 생성 (분화구 호수에 딱 겹쳐지게 배치)
+                    const effect = document.createElement('div');
+                    effect.className = 'crater-gold-effect';
+                    effect.innerHTML = '✨';
+                    effect.style.position = 'absolute';
+                    effect.style.top = '50%';
+                    effect.style.left = '50%';
+                    effect.style.transform = 'translate(-50%, -50%)';
+                    effect.style.fontSize = '50px';
+                    effect.style.fontWeight = '900';
+                    effect.style.color = '#FFD700';
+                    effect.style.textShadow = '0 0 20px rgba(255, 215, 0, 1), 0 0 10px rgba(255, 255, 255, 0.9)';
+                    effect.style.animation = 'craterGoldFloat 1.2s infinite alternate ease-in-out';
+                    effect.style.whiteSpace = 'nowrap';
+                    effect.style.zIndex = '20000';
+                    effect.style.pointerEvents = 'none';
+                    el.appendChild(effect);
+
                     setTimeout(() => {
                         if(!document.body.contains(el)) return;
                         bData.baking = false; el.style.filter = '';
+                        effect.remove(); // 진화 완료 시 이펙트 삭제
                         inventory.golden_potato++; updateUI();
-                        showAlert("✨ 황금 물고구마를 얻었습니다!");
+                        showAlert("✨ 황금 물고구마를 얻었습니다!", "success");
                     }, 30000);
                 } else showAlert("고구마가 1개 필요합니다!");
+            } else if (action === 'castle_feed') {
+                if (inventory.roasted >= 1) {
+                    inventory.roasted--; updateUI(); closeBuildingModal();
+                    
+                    // 성곽 바로 아래쪽에 군고구마 스폰
+                    let cx = parseInt(el.style.left) + el.offsetWidth / 2;
+                    let cy = parseInt(el.style.top) + el.offsetHeight + 15;
+                    
+                    const p = document.createElement('div');
+                    p.className = 'crop';
+                    p.innerText = '🍕';
+                    p.style.left = (cx - 20) + 'px';
+                    p.style.top = (cy - 20) + 'px';
+                    board.appendChild(p);
+                    
+                    const dropData = { el: p, type: 'roasted', x: cx, y: cy };
+                    droppedItems.push(dropData);
+                    showAlert("🍕 성곽에서 맛있는 군고구마가 배급되었습니다! 강아지가 소환됩니다.");
+                    
+                    // 강아지 한 마리가 바닥 고구마를 쫓아가도록 스폰
+                    setTimeout(() => spawnPuppy(dropData, false), 1000);
+                } else {
+                    showAlert("배급할 용암 군고구마가 없습니다!");
+                }
             }
         }
 
         function moveCurrentBuilding() {
-            if(!currentBuildingEl) return;
+            if(!currentBuildingEl || !currentBuildingKey) return;
             const el = currentBuildingEl;
+            const key = currentBuildingKey;
+            
+            // 기존 배치 목록에서 제거하여 재배치 시 자기 자신과의 겹침 충돌 방지
+            placedBuildings = placedBuildings.filter(b => b.el !== el);
+            
             closeBuildingModal();
-            // 임시로 이벤트 에뮬레이션
-            let ev = new MouseEvent('mousedown', { clientX: window.innerWidth/2, clientY: window.innerHeight/2 });
-            dragStart(ev, el);
+            
+            placingType = key;
+            shadow = el;
+            shadow.style.opacity = '0.6';
+            shadow.style.pointerEvents = 'none';
+            
+            // 이동 즉시 마우스 포인터(화면 중앙) 근처로 건물이 달라붙게 함
+            let cx = (window.innerWidth / 2 - boardX) / zoomLevel;
+            let cy = (window.innerHeight / 2 - boardY) / zoomLevel;
+            shadow.style.left = Math.round((cx - shadow.offsetWidth/2)/30)*30 + 'px';
+            shadow.style.top = Math.round((cy - shadow.offsetHeight/2)/30)*30 + 'px';
+            updateYSorting(shadow);
+            
+            showAlert("📍 건물을 이동할 새로운 위치를 클릭하세요!");
+            updateUI();
         }
 
         function demolishCurrentBuilding() {
@@ -1083,15 +1348,7 @@
         let droppedItems = [];
         let puppiesList = [];
         
-        function dropItem(type) {
-            if(type === 'roasted' && inventory.roasted >= 1) {
-                inventory.roasted--; updateUI();
-                spawnDroppedItem('🍕', 'roasted');
-            } else if(type === 'golden_potato' && inventory.golden_potato >= 1) {
-                inventory.golden_potato--; updateUI();
-                spawnDroppedItem('✨🍠', 'golden');
-            }
-        }
+
         
 
         function spawnDroppedItem(emoji, type) {
@@ -1138,10 +1395,28 @@
             }
         }
 
+        let volcanoCooldown = false;
+        let questionPool = [];
+        
+        function getNextQuestion() {
+            if (questionPool.length === 0) {
+                questionPool = [...questions];
+                for (let i = questionPool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questionPool[i], questionPool[j]] = [questionPool[j], questionPool[i]];
+                }
+            }
+            return questionPool.pop();
+        }
+
         document.getElementById('volcano').addEventListener('click', () => {
             if(shadow) return; 
+            if(volcanoCooldown) {
+                showAlert("🌋 에너지를 모으는 중입니다...<br><span style='font-size:18px; color:#FFE0B2;'>잠시만 기다려주세요!</span>");
+                return;
+            }
             const modal = document.getElementById('quiz-modal');
-            const qObj = questions[Math.floor(Math.random() * questions.length)];
+            const qObj = getNextQuestion();
             currentQuiz = qObj;
             document.getElementById('quiz-q').innerText = qObj.q;
             const optsDiv = document.getElementById('quiz-options');
@@ -1152,13 +1427,20 @@
                 btn.className = 'quiz-option'; btn.innerText = opt;
                 btn.onclick = () => {
                     if(idx === currentQuiz.a) {
-                        showAlert("정답! 대폭발!");
+                        showAlert("정답! 대폭발!", "success");
                         quizzesAnswered++; updateUI();
                         erupt(6); 
                     } else {
-                        showAlert("앗! 틀렸어요.<br><span style='font-size:18px; color:#FFE0B2;'>" + currentQuiz.exp + "</span>");
+                        showAlert("앗! 틀렸어요.<br><span style='font-size:18px; color:#FFE0B2;'>" + currentQuiz.exp + "</span>", "error");
                     }
                     modal.style.display = 'none';
+                    volcanoCooldown = true;
+                    const volcanoEl = document.getElementById('volcano');
+                    volcanoEl.classList.add('cooldown');
+                    setTimeout(() => { 
+                        volcanoCooldown = false; 
+                        volcanoEl.classList.remove('cooldown');
+                    }, 3000);
                 };
                 optsDiv.appendChild(btn);
             });
@@ -1228,7 +1510,7 @@
         setInterval(() => {
             dayTick++;
 
-            const maxTourists = Math.min(10, placedBuildings.length * 2 + 3);
+            const maxTourists = 10;
             if (touristsList.length < maxTourists && Math.random() < 0.05) {
                 spawnTourist();
             }
@@ -1415,6 +1697,13 @@
                         let dx = pup.target.x - pup.x; let dy = pup.target.y - pup.y;
                         let dist = Math.sqrt(dx*dx + dy*dy);
                         if(dist < 40) {
+                            // 고구마를 다가가 먹는 즉시 ⚔️ 기사 강아지로 멋지게 진화!
+                            pup.isKnight = true;
+                            pup.el.classList.add('puppy-knight');
+                            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+                            showEmotion(pup.x, pup.y, '⚔️');
+                            showAlert("⚔️ 강아지가 성곽 군고구마를 먹고 용맹한 기사 강아지가 되었습니다!", "success");
+
                             pup.state = 'eating'; pup.timer = 4;
                             pup.target.el.remove();
                             droppedItems = droppedItems.filter(d => d !== pup.target);
@@ -1441,33 +1730,40 @@
                     }
                 } else if (pup.state === 'roaming') {
                     if(pup.isKnight) {
-                        const particles = Array.from(document.querySelectorAll('.particle'));
-                        if(particles.length > 0) {
-                            const targetP = particles[Math.floor(Math.random() * particles.length)];
-                            pup.targetEl = targetP;
-                            pup.state = 'fetching';
+                        // 1순위: 바닥에 방치된 고구마가 있으면 주우러 감
+                        if(droppedItems.length > 0) {
+                            pup.target = droppedItems[0];
+                            pup.state = 'fetching_potato';
                         } else {
-                            let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
-                            pup.x += rx; pup.y += ry;
-                            updateSpriteDirection(pup.el, rx, ry, true);
+                            // 2순위: 원래대로 화산 자원 조각 수집
+                            const particles = Array.from(document.querySelectorAll('.particle'));
+                            if(particles.length > 0) {
+                                const targetP = particles[Math.floor(Math.random() * particles.length)];
+                                pup.targetEl = targetP;
+                                pup.state = 'fetching';
+                            } else {
+                                let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
+                                pup.x += rx; pup.y += ry;
+                                updateSpriteDirection(pup.el, rx, ry, true);
+                            }
                         }
                     } else {
-                        const castles = placedBuildings.filter(b => b.key === 'castle');
-                        if(castles.length > 0 && Math.random() < 0.2) {
-                            const c = castles[Math.floor(Math.random()*castles.length)];
-                            pup.targetEl = c.el;
-                            pup.state = 'going_castle';
-                        } else {
-                            let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
-                            pup.x += rx; pup.y += ry;
-                            updateSpriteDirection(pup.el, rx, ry, true);
-                        }
+                        let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
+                        pup.x += rx; pup.y += ry;
+                        updateSpriteDirection(pup.el, rx, ry, true);
                     }
                 } else if (pup.state === 'going_castle') {
                     if(pup.targetEl && pup.targetEl.parentNode) {
                         let tx = parseInt(pup.targetEl.style.left)+45; let ty = parseInt(pup.targetEl.style.top)+45;
                         let dx = tx - pup.x; let dy = ty - pup.y; let dist = Math.sqrt(dx*dx + dy*dy);
                         if(dist < 50) {
+                            // 기사로 변신할 때 쫓고 있던 군고구마가 바닥에 있으면 성곽 훈련 식량으로 즉시 정리
+                            if(pup.target && pup.target.el && pup.target.el.parentNode) {
+                                pup.target.el.remove();
+                                droppedItems = droppedItems.filter(d => d !== pup.target);
+                            }
+                            pup.target = null;
+                            
                             pup.isKnight = true; pup.el.classList.add('puppy-knight');
                             pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
                             showEmotion(pup.x, pup.y, '⚔️'); pup.state = 'roaming';
@@ -1494,6 +1790,34 @@
                             updateSpriteDirection(pup.el, mx, my, true);
                         }
                     } else pup.state = 'roaming';
+                } else if (pup.state === 'fetching_potato') {
+                    if(pup.target && pup.target.el && pup.target.el.parentNode) {
+                        let dx = pup.target.x - pup.x; let dy = pup.target.y - pup.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 50) {
+                            if(pup.target.type === 'roasted') {
+                                inventory.roasted++;
+                                showAlert("⚔️ 기사 강아지가 방치된 군고구마를 주워왔습니다!", "success");
+                            } else if(pup.target.type === 'golden') {
+                                inventory.golden_potato++;
+                                showAlert("⚔️ 기사 강아지가 방치된 황금 고구마를 주워왔습니다!", "success");
+                            }
+                            updateUI();
+                            pup.target.el.remove();
+                            droppedItems = droppedItems.filter(d => d !== pup.target);
+                            showEmotion(pup.x, pup.y, '🦴');
+                            pup.target = null;
+                            pup.state = 'roaming';
+                            updateSpriteDirection(pup.el, 0, 0, false);
+                        } else {
+                            let mx = dx * (speed/dist); let my = dy * (speed/dist);
+                            pup.x += mx; pup.y += my;
+                            updateSpriteDirection(pup.el, mx, my, true);
+                        }
+                    } else {
+                        pup.target = null;
+                        pup.state = 'roaming';
+                    }
                 } else if (pup.state === 'leaving') {
                     pup.x -= 300; pup.y -= 300;
                     updateSpriteDirection(pup.el, -300, -300, true);
@@ -1520,6 +1844,83 @@
             puppiesList = puppiesList.filter(p => p !== null);
         }, 500);
  
+
+        function restoreBuilding(key, initX, initY) {
+            const item = items[key];
+            let shadow = document.createElement('div');
+            shadow.className = `building obj-${item.type} size-${item.size}`;
+            shadow.dataset.key = key;
+            shadow.dataset.group = item.type;
+            
+            if (item.img) {
+                shadow.style.background = `url('${item.img}') no-repeat center/contain`;
+                shadow.classList.add('has-img');
+            } else {
+                shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
+            }
+            if (key === 'oven') shadow.innerHTML += '<div class="oven-fire">🔥</div>';
+            
+            shadow.style.left = initX + 'px';
+            shadow.style.top = initY + 'px';
+            board.appendChild(shadow);
+            updateYSorting(shadow);
+            
+            shadow.addEventListener('click', (ev) => {
+                if(isPanning) return;
+                openBuildingModal(shadow, key);
+            });
+            
+            placedBuildings.push({ key: key, el: shadow, timer: 0 });
+        }
+
+        function saveGame() {
+            const state = {
+                inventory: inventory,
+                quizzesAnswered: quizzesAnswered,
+                questsDone: quests.map(q => q.done),
+                firstQuestDelayPassed: firstQuestDelayPassed,
+                buildings: placedBuildings.map(b => ({
+                    key: b.key,
+                    x: parseFloat(b.el.style.left),
+                    y: parseFloat(b.el.style.top)
+                }))
+            };
+            localStorage.setItem('volcanoTycoonSave', JSON.stringify(state));
+        }
+
+        function loadGame() {
+            const savedStr = localStorage.getItem('volcanoTycoonSave');
+            if (savedStr) {
+                try {
+                    const state = JSON.parse(savedStr);
+                    Object.assign(inventory, state.inventory);
+                    quizzesAnswered = state.quizzesAnswered || 0;
+                    if (state.questsDone && state.questsDone.length === quests.length) {
+                        for(let i=0; i<quests.length; i++) {
+                            quests[i].done = state.questsDone[i];
+                        }
+                    }
+                    if (state.firstQuestDelayPassed !== undefined) {
+                        firstQuestDelayPassed = state.firstQuestDelayPassed;
+                    }
+                    if (state.buildings) {
+                        state.buildings.forEach(b => {
+                            restoreBuilding(b.key, b.x, b.y);
+                        });
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function resetGame() {
+            if (confirm("정말로 모든 데이터를 삭제하고 처음부터 다시 시작하시겠습니까?")) {
+                localStorage.removeItem('volcanoTycoonSave');
+                location.reload();
+            }
+        }
+
+        loadGame();
+        setInterval(saveGame, 5000);
 
         renderShop();
         updateUI();
