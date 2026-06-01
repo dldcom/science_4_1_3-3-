@@ -22,7 +22,7 @@
         .crop, .tourist { position: absolute; font-size: 40px; cursor: pointer; z-index: 19000; animation: bounceIn 0.5s; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
         @keyframes bounceIn { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        .emotion { position: absolute; font-size: 28px; animation: floatUp 2s forwards; z-index: 19500; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        .emotion { position: absolute; font-size: 16px; animation: floatUp 2s forwards; z-index: 19500; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 20% { transform: translateY(-10px) scale(1.2); } 100% { opacity: 0; transform: translateY(-40px) scale(1); } }
 
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20000; }
@@ -86,7 +86,7 @@
 
         
         /* 스프라이트 애니메이션 CSS */
-        .tourist-sprite, .puppy-sprite, .golden-puppy-sprite {
+        .tourist-sprite, .tourist-woman-sprite, .explorer-m-sprite, .explorer-f-sprite, .photographer-sprite, .puppy-sprite, .golden-puppy-sprite {
             position: absolute;
             width: 32px; height: 32px;
             background-size: 128px 128px;
@@ -96,6 +96,10 @@
             background-repeat: no-repeat;
         }
         .tourist-sprite { background-image: url('tourist_sprite.png'); }
+        .tourist-woman-sprite { background-image: url('tourist_woman_sprite.png'); }
+        .explorer-m-sprite { background-image: url('explorer_m_sprite.png'); }
+        .explorer-f-sprite { background-image: url('explorer_f_sprite.png'); }
+        .photographer-sprite { background-image: url('photographer_sprite.png'); }
         .puppy-sprite { background-image: url('puppy_sprite.png'); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
         .golden-puppy-sprite { 
             background-image: url('puppy_sprite.png');
@@ -114,6 +118,10 @@
         .walk-left { background-position-y: -96px; }
 
         .tourist-sprite.walk-down, .tourist-sprite.walk-up, .tourist-sprite.walk-right, .tourist-sprite.walk-left,
+        .tourist-woman-sprite.walk-down, .tourist-woman-sprite.walk-up, .tourist-woman-sprite.walk-right, .tourist-woman-sprite.walk-left,
+        .explorer-m-sprite.walk-down, .explorer-m-sprite.walk-up, .explorer-m-sprite.walk-right, .explorer-m-sprite.walk-left,
+        .explorer-f-sprite.walk-down, .explorer-f-sprite.walk-up, .explorer-f-sprite.walk-right, .explorer-f-sprite.walk-left,
+        .photographer-sprite.walk-down, .photographer-sprite.walk-up, .photographer-sprite.walk-right, .photographer-sprite.walk-left,
         .puppy-sprite.walk-down, .puppy-sprite.walk-up, .puppy-sprite.walk-right, .puppy-sprite.walk-left {
             animation: walk-normal 0.6s steps(4) infinite;
         }
@@ -152,6 +160,25 @@
         #zoom-controls { position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 30000; pointer-events: auto; }
         .zoom-btn { background: rgba(255,255,255,0.95); border: 2px solid #555; border-radius: 12px; width: 55px; height: 55px; font-size: 26px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; }
         .zoom-btn:active { transform: scale(0.9); }
+
+        @media (max-width: 900px) {
+            #inventory {
+                top: 10px; left: 10px; right: 10px;
+                flex-wrap: wrap; justify-content: flex-start;
+                padding: 5px; gap: 5px;
+            }
+            .inv-item { font-size: 14px; padding: 2px 6px; }
+            .inv-item img, .inv-item span.icon { width: 20px; height: 20px; font-size: 16px; margin-right: 2px; }
+            
+            #shop-toggle-btn { top: auto; bottom: 15px; right: 15px; z-index: 20002; font-size: 15px; padding: 8px 12px; }
+            #shop { top: 10vh; right: 15px; width: calc(100vw - 30px); max-width: 320px; height: 75vh; }
+            
+            #quest-toggle-btn { top: auto; bottom: 15px; right: 130px; z-index: 20002; font-size: 15px; padding: 8px 12px; }
+            #quest-panel { top: 10vh; right: 15px; width: calc(100vw - 30px); max-width: 320px; height: 50vh; }
+            
+            #zoom-controls { bottom: 70px; right: 15px; }
+            #medals-container { top: auto; bottom: 15px; left: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -202,6 +229,15 @@
             </div>
         </div>
         
+        <div id="quest-complete-modal" class="modal-bg" style="z-index: 46000; align-items: flex-start; padding-top: 100px; display: none;">
+            <div class="modal-content" style="max-width: 450px; border: 4px solid #28a745; background: #f0fdf4; box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);">
+                <h2 style="color: #28a745; font-size: 28px; margin-bottom: 15px; border-bottom: 2px solid #28a745; padding-bottom: 10px;">🎉 퀘스트 완료!</h2>
+                <div id="quest-complete-title" style="font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #155724;">퀘스트 제목</div>
+                <div id="quest-complete-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold;">보상 내용</div>
+                <button class="close-btn" style="background: #28a745; color: white; padding: 12px 30px; font-size: 18px;" onclick="closeQuestComplete()">확인</button>
+            </div>
+        </div>
+        
         <div id="quiz-modal" class="modal-bg">
             <div class="modal-content">
                 <h2 id="quiz-q">질문</h2>
@@ -242,6 +278,21 @@
                 <button class="close-btn" onclick="document.getElementById('dict-modal').style.display='none'">닫기</button>
             </div>
         </div>
+
+        <div id="instructions-modal" class="modal-bg" style="display: flex; z-index: 50000;">
+            <div class="modal-content" style="max-width: 600px; padding: 40px; border: 8px solid #000; border-radius: 24px; box-shadow: 12px 12px 0px #000; background-color: #FFF;">
+                <h2 style="font-size: 40px; font-weight: 900; color: #000; margin-bottom: 30px; text-align: center; letter-spacing: -1px; text-shadow: 3px 3px 0px #FF5722; word-break: keep-all;">🌋 게임 방법</h2>
+                <div style="text-align: left; font-size: 24px; line-height: 1.5; margin-bottom: 40px; color: #000; word-break: keep-all; font-weight: 800;">
+                    <div style="margin-bottom: 25px; padding: 25px; background: #E3F2FD; border: 5px solid #000; border-radius: 16px; box-shadow: 6px 6px 0px #000;">
+                        1. 중앙 화산을 클릭하여 문제를 푸세요.<br>정답을 맞추면 화산 분출물이 나옵니다.
+                    </div>
+                    <div style="padding: 25px; background: #FFF9C4; border: 5px solid #000; border-radius: 16px; box-shadow: 6px 6px 0px #000;">
+                        2. 획득한 화산 분출물로 건물을 지어보세요.
+                    </div>
+                </div>
+                <button class="close-btn" style="background: #FF5722; color: #FFF; font-size: 28px; font-weight: 900; padding: 20px 40px; width: 100%; box-sizing: border-box; border: 6px solid #000; border-radius: 16px; box-shadow: 8px 8px 0px #000; cursor: pointer; transition: all 0.1s; letter-spacing: 1px;" onmousedown="this.style.transform='translate(4px, 4px)'; this.style.boxShadow='4px 4px 0px #000';" onmouseup="this.style.transform='none'; this.style.boxShadow='8px 8px 0px #000';" onclick="document.getElementById('instructions-modal').style.display='none'">게임 시작하기</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -253,8 +304,8 @@
         let dayTick = 0; 
         
         // Panning logic
-        let boardX = -1000; // Start at center-ish of 3000x3000 map
-        let boardY = -1000;
+        let boardX = (window.innerWidth / 2) - 1500;
+        let boardY = (window.innerHeight / 2) - 1500;
         let zoomLevel = 1.0;
         const board = document.getElementById('game-board');
         
@@ -278,9 +329,11 @@
         
         let isPanning = false;
         let panStartX = 0, panStartY = 0;
+        let initialPinchDistance = null;
+        let initialZoomLevel = 1.0;
 
         document.getElementById('viewport').addEventListener('mousedown', (e) => {
-            if(e.target === board) {
+            if(e.target === board || e.target.closest('#volcano')) {
                 isPanning = true;
                 panStartX = e.clientX - boardX;
                 panStartY = e.clientY - boardY;
@@ -300,23 +353,79 @@
                 board.style.cursor = '';
             }
         });
+
+        // Wheel zoom logic
+        document.getElementById('viewport').addEventListener('wheel', (e) => {
+            let oldZoom = zoomLevel;
+            let zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            zoomLevel *= zoomFactor;
+            
+            if(zoomLevel < 0.4) zoomLevel = 0.4;
+            if(zoomLevel > 2.0) zoomLevel = 2.0;
+            
+            let cx = e.clientX;
+            let cy = e.clientY;
+            
+            boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+            boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+            updateTransform();
+        }, {passive: true});
         
+        function getDistance(touch1, touch2) {
+            let dx = touch1.clientX - touch2.clientX;
+            let dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx*dx + dy*dy);
+        }
+
         document.getElementById('viewport').addEventListener('touchstart', (e) => {
-            if(e.target === board) {
+            if(e.touches.length === 1 && (e.target === board || e.target.closest('#volcano'))) {
                 isPanning = true;
                 panStartX = e.touches[0].clientX - boardX;
                 panStartY = e.touches[0].clientY - boardY;
+            } else if(e.touches.length === 2) {
+                isPanning = false;
+                initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+                initialZoomLevel = zoomLevel;
             }
         }, {passive: false});
+        
         document.addEventListener('touchmove', (e) => {
-            if(isPanning) {
+            if(isPanning && e.touches.length === 1) {
                 e.preventDefault(); 
                 boardX = e.touches[0].clientX - panStartX;
                 boardY = e.touches[0].clientY - panStartY;
                 updateTransform();
+            } else if(e.touches.length === 2 && initialPinchDistance) {
+                e.preventDefault();
+                let currentDistance = getDistance(e.touches[0], e.touches[1]);
+                let scale = currentDistance / initialPinchDistance;
+                
+                let oldZoom = zoomLevel;
+                zoomLevel = initialZoomLevel * scale;
+                if(zoomLevel < 0.4) zoomLevel = 0.4;
+                if(zoomLevel > 2.0) zoomLevel = 2.0;
+                
+                let cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                let cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                
+                boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+                boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+                updateTransform();
             }
         }, {passive: false});
-        document.addEventListener('touchend', () => { isPanning = false; });
+        
+        document.addEventListener('touchend', (e) => { 
+            if(e.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+            if(e.touches.length === 0) {
+                isPanning = false; 
+            } else if (e.touches.length === 1 && !isPanning) {
+                isPanning = true;
+                panStartX = e.touches[0].clientX - boardX;
+                panStartY = e.touches[0].clientY - boardY;
+            }
+        });
 
         const items = {
             // Size 1
@@ -448,34 +557,38 @@
             
             let activeQuest = quests.find(q => !q.done);
             
-            if (activeQuest && activeQuest.condition()) {
-                activeQuest.done = true;
-                let msg = `🎉 퀘스트 완료: ${activeQuest.title}<br>📖 도감이 새롭게 해금되었습니다!`;
-                if(activeQuest.medal) {
-                    msg += `<br>${activeQuest.medal} 훈장 획득!`;
-                    document.getElementById('medals-container').innerHTML += activeQuest.medal;
+            const completeModal = document.getElementById('quest-complete-modal');
+            if (completeModal && completeModal.style.display === 'flex') {
+                // Do nothing if complete modal is showing
+            } else {
+                if (activeQuest && activeQuest.condition()) {
+                    activeQuest.done = true;
+                    let rewardText = `📖 도감이 새롭게 해금되었습니다!`;
+                    if(activeQuest.medal) {
+                        rewardText += `<br>${activeQuest.medal} 훈장 획득!`;
+                        document.getElementById('medals-container').innerHTML += activeQuest.medal;
+                    }
+                    
+                    if(!anyUnlocked) {
+                        document.getElementById('dict-content').innerHTML = '';
+                        anyUnlocked = true;
+                    }
+                    document.getElementById('dict-content').innerHTML += `
+                        <div class="dict-entry">
+                            <div style="color:#FF5722; font-size:14px;">[${activeQuest.title} 달성]</div>
+                            ${activeQuest.dict}
+                        </div>
+                    `;
+                    
+                    document.getElementById('quest-complete-title').innerText = activeQuest.title;
+                    document.getElementById('quest-complete-desc').innerHTML = rewardText;
+                    completeModal.style.display = 'flex';
+                } else if (activeQuest && activeQuest.id !== lastShownQuestId) {
+                    lastShownQuestId = activeQuest.id;
+                    document.getElementById('quest-alert-title').innerText = activeQuest.title;
+                    document.getElementById('quest-alert-desc').innerText = activeQuest.desc;
+                    document.getElementById('quest-alert-modal').style.display = 'flex';
                 }
-                showAlert(msg);
-                
-                if(!anyUnlocked) {
-                    document.getElementById('dict-content').innerHTML = '';
-                    anyUnlocked = true;
-                }
-                document.getElementById('dict-content').innerHTML += `
-                    <div class="dict-entry">
-                        <div style="color:#FF5722; font-size:14px;">[${activeQuest.title} 달성]</div>
-                        ${activeQuest.dict}
-                    </div>
-                `;
-                
-                activeQuest = quests.find(q => !q.done);
-            }
-
-            if (activeQuest && activeQuest.id !== lastShownQuestId) {
-                lastShownQuestId = activeQuest.id;
-                document.getElementById('quest-alert-title').innerText = activeQuest.title;
-                document.getElementById('quest-alert-desc').innerText = activeQuest.desc;
-                document.getElementById('quest-alert-modal').style.display = 'flex';
             }
 
             quests.forEach(q => {
@@ -1063,8 +1176,11 @@
             ];
             const edge = edges[Math.floor(Math.random() * edges.length)];
             
+            const types = ['tourist-sprite', 'tourist-woman-sprite', 'explorer-m-sprite', 'explorer-f-sprite', 'photographer-sprite'];
+            const type = types[Math.floor(Math.random() * types.length)];
             const t = document.createElement('div');
-            t.className = 'tourist-sprite walk-down';
+            t.className = type + ' walk-down';
+            t.dataset.type = type;
             t.style.left = edge.x + 'px';
             t.style.top = edge.y + 'px';
             t.style.transition = 'left 1s linear, top 1s linear';
@@ -1112,8 +1228,8 @@
         setInterval(() => {
             dayTick++;
 
-            const maxTourists = placedBuildings.length * 2 + 3;
-            if (touristsList.length < maxTourists && Math.random() < 0.3) {
+            const maxTourists = Math.min(10, placedBuildings.length * 2 + 3);
+            if (touristsList.length < maxTourists && Math.random() < 0.05) {
                 spawnTourist();
             }
 
@@ -1212,6 +1328,9 @@
                         t.x += rndX;
                         t.y += rndY;
                         updateSpriteDirection(t.el, rndX, rndY, true);
+                        if (t.el.dataset.type === 'photographer-sprite' && Math.random() < 0.3) {
+                            showEmotion(t.x, t.y, '📸');
+                        }
                     }
                 } else if (t.state === 'moving') {
                     if (t.target && t.target.el.parentNode) {
@@ -1404,6 +1523,10 @@
 
         renderShop();
         updateUI();
+        function closeQuestComplete() {
+            document.getElementById('quest-complete-modal').style.display = 'none';
+            updateUI();
+        }
 
     </script>
 </body>
