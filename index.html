@@ -634,17 +634,26 @@
             crater: { name: '분화구 호수', type: '3d', size: 3, img: 'crater_processed.webp', desc: '분화구(마그마가 나온 구멍)에 맑은 물이 고인 호수', cost: { ash: 5, rock: 5, gas: 5 } }
         };
 
-        const quests = [
+                const quests = [
             { id: 'q1', title: '구멍 숭숭 현무암 돌담', desc: '현무암 돌담 2개 건설하기', condition: () => countB('wall') >= 2, done: false, dict: '현무암은 마그마가 지표 부근에서 식어 만들어지며 어두운색에 가스가 빠져나간 구멍이 뚫려 있기도 합니다.' },
             { id: 'q2', title: '신비로운 육각 기둥', desc: '주상절리 육각 기둥 1개 건설하기', condition: () => countB('pillar') >= 1, done: false, dict: '용암이 빠르게 식으면서 수축하여 육각형 기둥 모양으로 갈라져 단단하게 굳어진 지형을 주상절리라고 합니다.' },
             { id: 'q3', title: '피로를 풀어주는 물', desc: '천연 화산 온천 1개 건설하기', condition: () => countB('hot') >= 1, done: false, dict: '지하수가 땅속 깊은 마그마의 뜨거운 열기에 의해 데워져 솟아나는 것을 온천이라고 부릅니다.' },
-            { id: 'q4', title: '풍요를 품은 화산재', desc: '비옥한 화산재 농장 1개 건설하기', condition: () => countB('farm') >= 1, done: false, dict: '화산재는 초기엔 시야를 가리거나 식물에 해를 입히기도 하지만, 시간이 지나면 흙을 비옥하게 만들어 농사가 잘되도록 돕습니다.' },
-            { id: 'q5', title: '지구의 뜨거운 화덕', desc: '마그마 돌 화덕 1개 건설하기', condition: () => countB('oven') >= 1, done: false, dict: '마그마의 강력하고 풍부한 열기는 지열 에너지를 이용한 요리나 친환경 발전에 널리 쓰일 수 있습니다.' },
-            { id: 'q6', title: '물에 뜨는 신기한 돌', desc: '부석 미니 연못 1개 건설하기', condition: () => countB('pond') >= 1, done: false, dict: '용암이 식으면서 많은 양의 가스가 한꺼번에 빠져나가 구멍이 가득 차고 가벼워 물에 뜨는 암석을 부석이라고 합니다.' },
-            { id: 'q7', title: '지구가 주는 엄청난 전기', desc: '지열 발전소 1개 건설하기', condition: () => countB('power') >= 1, done: false, dict: '화산 주변 땅속 깊은 마그마의 엄청난 열을 이용해 친환경적인 전기를 생산하는 방식을 지열 발전이라고 합니다.' },
-            { id: 'q8', title: '천지와 백록담의 전설', desc: '분화구 호수 1개 건설하기', condition: () => countB('crater') >= 1, done: false, dict: '화산 꼭대기에 마그마가 뿜어져 나왔던 웅덩이(분화구)에 오랜 시간 물이 고여 백두산 천지나 한라산 백록담 같은 호수가 생겨납니다.' },
-            { id: 'q9', title: '세계적인 관광 명소', desc: '누적 관광객 15명 달성하기', condition: () => inventory.tourists >= 15, done: false, medal: '🥈', dict: '주상절리나 온천, 분화구 호수 등 화산 활동으로 형성된 지형들은 매우 아름다워 사람들이 많이 찾는 훌륭한 관광 명소가 됩니다.' },
-            { id: 'q10', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' }
+            { id: 'q4', title: '하늘에서 떨어진 화산탄', desc: '화산탄 조각상 1개 건설하기', condition: () => countB('bomb') >= 1, done: false, dict: '화산 분출 시 공중으로 날아간 용암 조각이 돌면서 식어 굳어지면 타원체나 고구마 모양의 화산탄이 만들어집니다.' },
+            { id: 'q5', title: '풍요를 품은 화산재', desc: '비옥한 화산재 농장 1개 건설하기', condition: () => countB('farm') >= 1, done: false, dict: '화산재는 초기엔 시야를 가리거나 식물에 해를 입히기도 하지만, 시간이 지나면 흙을 비옥하게 만들어 농작물이 잘 자라게 돕습니다.' },
+            { id: 'q6', title: '지구의 뜨거운 화덕', desc: '마그마 돌 화덕 1개 건설하기', condition: () => countB('oven') >= 1, done: false, dict: '마그마의 강력하고 풍부한 열기는 지열 에너지를 이용한 요리나 친환경 발전 등에 다양하게 활용될 수 있습니다.' },
+            { id: 'q7', title: '노릇노릇 군고구마', desc: '용암 군고구마 3개 만들기', condition: () => inventory.roasted >= 3, done: false, dict: '마그마 돌 화덕의 뜨거운 열기를 이용하면 아주 달콤하고 맛있는 용암 군고구마를 구워낼 수 있습니다.' },
+            { id: 'q8', title: '돌하르방의 지혜', desc: '현무암 조각 공원 1개 건설하기', condition: () => countB('harubang') >= 1, done: false, dict: '현무암은 단단하면서 깎기 적당하여 돌하르방과 같은 조각 예술품을 만들기 아주 좋은 지질학적 자원입니다.' },
+            { id: 'q9', title: '물에 뜨는 신기한 돌', desc: '부석 미니 연못 1개 건설하기', condition: () => countB('pond') >= 1, done: false, dict: '용암이 식을 때 가스가 빠져나가 구멍이 숭숭 뚫려 물에 뜰 정도로 가벼워진 암석을 부석이라고 합니다.' },
+            { id: 'q10', title: '검은 모래 해변의 매력', desc: '검은 모래 해변 1개 건설하기', condition: () => countB('sand') >= 1, done: false, dict: '현무암질 모래가 파도와 바람에 깎이고 해안에 쌓이면서 검은 빛깔을 띠는 독특하고 아름다운 검은 모래 해변이 생겨납니다.' },
+            { id: 'q11', title: '초비옥 농장 업그레이드', desc: '농장을 초비옥 화산재 농장으로 업그레이드하기', condition: () => placedBuildings.filter(b => b.key === 'farm' && b.el.dataset.upgraded === "true").length >= 1, done: false, dict: '화산재 농장은 화산재 20개를 투입해 더욱 비옥하게 개간할 수 있으며, 개간 시 고구마 자라는 속도가 2배 빨라집니다.' },
+            { id: 'q12', title: '지구가 주는 엄청난 전기', desc: '지열 발전소 1개 건설하기', condition: () => countB('power') >= 1, done: false, dict: '화산 주변 땅속 깊은 마그마의 엄청난 열을 이용해 친환경적인 전기를 생산하는 방식을 지열 발전이라고 합니다.' },
+            { id: 'q13', title: '천지와 백록담의 전설', desc: '분화구 호수 1개 건설하기', condition: () => countB('crater') >= 1, done: false, dict: '화산 꼭대기에 마그마가 뿜어져 나왔던 웅덩이(분화구)에 오랜 시간 물이 고여 백두산 천지나 한라산 백록담 같은 호수가 생겨납니다.' },
+            { id: 'q14', title: '철통 보안 현무암 성곽', desc: '단단한 현무암 성곽 1개 건설하기', condition: () => countB('castle') >= 1, done: false, dict: '현무암은 단단하고 튼튼한 성질을 지니고 있어 방어용 성곽이나 튼튼한 장벽을 건축하는 데 최적의 재료로 쓰였습니다.' },
+            { id: 'q15', title: '용맹한 기사 강아지', desc: '기사 강아지 1마리 이상 육성하기', condition: () => puppiesList.filter(p => p.isKnight).length >= 1, done: false, dict: '튼튼한 현무암 성곽에서 군고구마를 던져주면 지나가던 일반 강아지가 성으로 가 고구마를 먹고 훈련을 마친 멋진 기사 강아지가 됩니다.' },
+            { id: 'q16', title: '화산 가스의 힘', desc: '화산 가스 30개 보유하기', condition: () => inventory.gas >= 30, done: false, dict: '화산 가스는 화산 분출 시 나오는 기체 물질로, 수증기가 대부분을 차지하며 이산화 탄소와 이산화 황 등의 성분이 섞여 있습니다.' },
+            { id: 'q17', title: '화산 자원의 조화', desc: '가스, 용암, 화산재, 암석 각각 10개 이상 보유하기', condition: () => inventory.gas >= 10 && inventory.lava >= 10 && inventory.ash >= 10 && inventory.rock >= 10, done: false, dict: '화산이 분출할 때는 기체 상태(화산 가스), 액체 상태(용암), 고체 상태(화산재, 화산 암석 조각)의 다양한 분출물들이 동시에 쏟아져 나옵니다.' },
+            { id: 'q18', title: '세계적인 관광 명소', desc: '누적 관광객 15명 달성하기', condition: () => inventory.tourists >= 15, done: false, medal: '🥈', dict: '주상절리나 온천, 분화구 호수 등 화산 활동으로 형성된 지형들은 매우 아름다워 사람들이 많이 찾는 훌륭한 관광 명소가 됩니다.' },
+            { id: 'q19', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' }
         ];
 
         const questions = [
@@ -851,36 +860,7 @@
             return false;
         }
 
-        function handleOvenClick(ovenEl) {
-            if(inventory.potato >= 1 && !ovenEl.dataset.baking) {
-                inventory.potato--;
-                updateUI();
-                ovenEl.dataset.baking = "true";
-                if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'block';
-                ovenEl.style.filter = 'drop-shadow(0 0 15px #FF5722) brightness(1.2)';
-                showAlert("🔥 고구마를 굽는 중... (10초)");
-                
-                setTimeout(() => {
-                    ovenEl.dataset.baking = "";
-                    if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'none';
-                    ovenEl.style.filter = '';
-                    inventory.roasted++;
-                    updateUI();
-                    showAlert("🍕 용암 군고구마 완성!");
-                    
-                    const p = document.createElement('div');
-                    p.className = 'crop';
-                    p.innerText = '🍕';
-                    p.style.left = (parseInt(ovenEl.style.left) + ovenEl.offsetWidth/2 - 20) + 'px';
-                    p.style.top = (parseInt(ovenEl.style.top) + ovenEl.offsetHeight/2 - 20) + 'px';
-                    p.addEventListener('mousedown', () => checkCollection(p));
-                    p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
-                    board.appendChild(p);
-                }, 10000);
-            } else if (inventory.potato < 1 && !ovenEl.dataset.baking) {
-                showAlert("고구마가 부족합니다!");
-            }
-        }
+
 
         function handleFarmClick(farmEl) {
             if (farmEl.dataset.upgraded === "true") {
@@ -907,23 +887,41 @@
         document.addEventListener('mouseup', () => isSweeping = false);
         document.addEventListener('touchstart', () => isSweeping = true);
         document.addEventListener('touchend', () => isSweeping = false);
+        document.addEventListener('touchcancel', () => isSweeping = false);
 
         document.addEventListener('touchmove', (e) => {
             if(!isSweeping) return;
             const touch = e.touches[0];
             const el = document.elementFromPoint(touch.clientX, touch.clientY);
             if(el) checkCollection(el);
-        });
+        }, {passive: true});
 
         function checkCollection(el) {
-            if(el.classList.contains('particle') && !el.dataset.collected) {
+            if(!el || el.dataset.collected) return;
+
+            if(el.classList.contains('particle')) {
                 el.dataset.collected = "true";
                 inventory[el.dataset.res]++;
-                el.remove();
+                
+                // 모바일 터치 대응: 요소 제거 시 터치 스트림 끊김 현상 방지를 위해 딜레이 삭제 처리
+                el.style.left = '-9999px';
+                el.style.top = '-9999px';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                setTimeout(() => el.remove(), 1000);
+                
                 updateUI();
             } else if(el.classList.contains('crop')) {
+                el.dataset.collected = "true";
                 inventory.potato++;
-                el.remove();
+                
+                // 모바일 터치 대응: 요소 제거 시 터치 스트림 끊김 현상 방지를 위해 딜레이 삭제 처리
+                el.style.left = '-9999px';
+                el.style.top = '-9999px';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                setTimeout(() => el.remove(), 1000);
+                
                 updateUI();
                 showAlert("🍠 고구마 수확!");
             }
@@ -1139,8 +1137,12 @@
 
             p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
             p.addEventListener('mousedown', () => checkCollection(p));
-            p.addEventListener('touchstart', (e) => { e.preventDefault(); checkCollection(p); }, {passive: false});
-            setTimeout(() => { if(p.parentNode) p.remove(); }, 15000);
+            p.addEventListener('touchstart', (e) => { 
+                isSweeping = true;
+                e.preventDefault(); 
+                checkCollection(p); 
+            }, {passive: false});
+            setTimeout(() => { if(p.parentNode && !p.dataset.collected) p.remove(); }, 15000);
         }
 
         
@@ -1526,6 +1528,11 @@
                     p.style.top = (parseInt(b.el.style.top) + Math.random()*30) + 'px';
                     p.addEventListener('mousedown', () => checkCollection(p));
                     p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
+                    p.addEventListener('touchstart', (e) => {
+                        isSweeping = true;
+                        e.preventDefault();
+                        checkCollection(p);
+                    }, {passive: false});
                     board.appendChild(p);
                 }
             });
@@ -1845,18 +1852,25 @@
         }, 500);
  
 
-        function restoreBuilding(key, initX, initY) {
+        function restoreBuilding(key, initX, initY, upgraded) {
             const item = items[key];
             let shadow = document.createElement('div');
             shadow.className = `building obj-${item.type} size-${item.size}`;
             shadow.dataset.key = key;
             shadow.dataset.group = item.type;
             
-            if (item.img) {
-                shadow.style.background = `url('${item.img}') no-repeat center/contain`;
-                shadow.classList.add('has-img');
+            if (upgraded) {
+                shadow.dataset.upgraded = "true";
+                if (key === 'farm') {
+                    shadow.style.background = `url('farm_upgraded_processed.webp') no-repeat center/contain`;
+                }
             } else {
-                shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
+                if (item.img) {
+                    shadow.style.background = `url('${item.img}') no-repeat center/contain`;
+                    shadow.classList.add('has-img');
+                } else {
+                    shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
+                }
             }
             if (key === 'oven') shadow.innerHTML += '<div class="oven-fire">🔥</div>';
             
@@ -1870,7 +1884,7 @@
                 openBuildingModal(shadow, key);
             });
             
-            placedBuildings.push({ key: key, el: shadow, timer: 0 });
+            placedBuildings.push({ key: key, el: shadow, timer: 0, upgraded: !!upgraded });
         }
 
         function saveGame() {
@@ -1882,7 +1896,8 @@
                 buildings: placedBuildings.map(b => ({
                     key: b.key,
                     x: parseFloat(b.el.style.left),
-                    y: parseFloat(b.el.style.top)
+                    y: parseFloat(b.el.style.top),
+                    upgraded: !!b.upgraded
                 }))
             };
             localStorage.setItem('volcanoTycoonSave', JSON.stringify(state));
@@ -1895,8 +1910,8 @@
                     const state = JSON.parse(savedStr);
                     Object.assign(inventory, state.inventory);
                     quizzesAnswered = state.quizzesAnswered || 0;
-                    if (state.questsDone && state.questsDone.length === quests.length) {
-                        for(let i=0; i<quests.length; i++) {
+                    if (state.questsDone) {
+                        for(let i=0; i<Math.min(quests.length, state.questsDone.length); i++) {
                             quests[i].done = state.questsDone[i];
                         }
                     }
@@ -1905,7 +1920,7 @@
                     }
                     if (state.buildings) {
                         state.buildings.forEach(b => {
-                            restoreBuilding(b.key, b.x, b.y);
+                            restoreBuilding(b.key, b.x, b.y, b.upgraded);
                         });
                     }
                 } catch(e) {}
