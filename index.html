@@ -77,13 +77,18 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100dvh;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
             z-index: 30000;
             justify-content: center;
             align-items: center;
             pointer-events: auto;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            box-sizing: border-box;
         }
 
         /* 공통 모달 콘텐츠 스타일 */
