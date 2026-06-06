@@ -1252,7 +1252,10 @@
                 } else showAlert("구울 고구마가 없습니다!");
             } else if (action === 'farm_upgrade') {
                 if (inventory.ash >= 20) {
-                    inventory.ash -= 20; bData.upgraded = true; updateUI();
+                    inventory.ash -= 20; 
+                    bData.upgraded = true; 
+                    el.dataset.upgraded = "true"; // Update DOM for quest and growth logic
+                    updateUI();
                     el.style.background = `url('farm_upgraded_processed.webp') no-repeat center/contain`;
                     showAlert("✨ 초비옥 농장으로 업그레이드 되었습니다!");
                     closeBuildingModal();
