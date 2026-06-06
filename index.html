@@ -1732,6 +1732,7 @@
                             pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
                             showEmotion(pup.x, pup.y, '⚔️');
                             showAlert("⚔️ 강아지가 성곽 군고구마를 먹고 용맹한 기사 강아지가 되었습니다!", "success");
+                            updateUI();
 
                             pup.state = 'eating'; pup.timer = 4;
                             pup.target.el.remove();
@@ -1796,6 +1797,7 @@
                             pup.isKnight = true; pup.el.classList.add('puppy-knight');
                             pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
                             showEmotion(pup.x, pup.y, '⚔️'); pup.state = 'roaming';
+                            updateUI();
                             updateSpriteDirection(pup.el, 0, 0, false);
                         } else {
                             let mx = dx * (speed/dist); let my = dy * (speed/dist);
