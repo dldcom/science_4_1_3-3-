@@ -406,7 +406,7 @@
                 <div class="inv-item" onclick="showResInfo('ash', '화산재', '화산 분출물 중 고체 상태입니다. 아주 작은 알갱이로 바람을 타고 멀리 날아갈 수 있으며, 나중에는 땅을 비옥하게 합니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="ash_processed.webp">화산재: <span id="inv-ash">0</span></div>
                 <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
                 <div class="inv-item" title="고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
-                <div class="inv-item" title="용암 군고구마"><span class="icon">🍠</span><span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="용암 군고구마"><span class="icon">🔥🍠</span><span id="inv-roasted">0</span></div>
                 <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
             </div>
             
@@ -961,11 +961,11 @@
                     ovenEl.style.filter = '';
                     inventory.roasted++;
                     updateUI();
-                    showAlert("🍠 용암 군고구마 완성!");
+                    showAlert("🔥🍠 용암 군고구마 완성!");
                     
                     const p = document.createElement('div');
                     p.className = 'crop';
-                    p.innerText = '🍠';
+                    p.innerText = '🔥🍠';
                     p.style.left = (parseInt(ovenEl.style.left) + ovenEl.offsetWidth/2 - 20) + 'px';
                     p.style.top = (parseInt(ovenEl.style.top) - 40) + 'px';
                     board.appendChild(p);
@@ -1194,7 +1194,7 @@
             else if (key === 'pond') extraDesc = `📌 <b>수분 공급 (수동)</b><br>10초 동안 주변에 화산 가스를 집중적으로 스폰시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('pond')">💧 가스 스폰 시작</button>`;
             else if (key === 'oven') extraDesc = `📌 <b>군고구마 굽기 (수동)</b><br>고구마 1개를 뜨거운 열기로 10초간 구워 군고구마를 만듭니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('oven')" ${bData.baking ? 'disabled' : ''}>🔥 고구마 굽기</button>`;
             else if (key === 'sand') extraDesc = `📌 <b>조개 줍기 (패시브)</b><br>20초마다 해변 주변에 조개 대신 무작위 자원이 스폰됩니다.`;
-            else if (key === 'castle') extraDesc = `📌 <b>강아지 기사단 (수동)</b><br>맛있는 군고구마를 사용하여 지나가는 일반 강아지(🐶)를 유인해 ⚔️ 투구를 쓴 기사로 진화시킵니다!<br><br><button class="building-action-btn" onclick="triggerBuildingAction('castle_feed')">🍠 군고구마 1개 사용</button>`;
+            else if (key === 'castle') extraDesc = `📌 <b>강아지 기사단 (수동)</b><br>맛있는 군고구마를 사용하여 지나가는 일반 강아지(🐶)를 유인해 ⚔️ 투구를 쓴 기사로 진화시킵니다!<br><br><button class="building-action-btn" onclick="triggerBuildingAction('castle_feed')">🔥🍠 군고구마 1개 사용</button>`;
             else if (key === 'crater') extraDesc = `📌 <b>신비한 작용 (수동)</b><br>용암을 소비해 자원을 폭발시키거나 고구마를 황금으로 진화시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('crater_fuse')" style="background:#9C27B0; margin-bottom:8px;">🌊 풍요의 호수 폭발 (용암 10)</button><button class="building-action-btn" onclick="triggerBuildingAction('crater_gold')" style="background:#E6C229; color:black;">✨ 황금 고구마 진화 (고구마 1)</button>`;
             else if (key === 'farm') {
                 extraDesc = `📌 <b>고구마 농사 (패시브)</b><br>시간이 지날 때마다 자동으로 고구마를 수확합니다.`;
@@ -1247,7 +1247,7 @@
                         if(el.querySelector('.oven-fire')) el.querySelector('.oven-fire').style.display = 'none';
                         el.style.filter = '';
                         inventory.roasted++; updateUI();
-                        showAlert("🍠 용암 군고구마 완성!");
+                        showAlert("🔥🍠 용암 군고구마 완성!");
                     }, 10000);
                 } else showAlert("구울 고구마가 없습니다!");
             } else if (action === 'farm_upgrade') {
@@ -1310,7 +1310,7 @@
                     
                     const p = document.createElement('div');
                     p.className = 'crop';
-                    p.innerText = '🍠';
+                    p.innerText = '🔥🍠';
                     p.style.left = (cx - 20) + 'px';
                     p.style.top = (cy - 20) + 'px';
                     p.style.pointerEvents = 'none'; // Prevent player from picking it up
@@ -1318,7 +1318,7 @@
                     
                     const dropData = { el: p, type: 'roasted', x: cx, y: cy };
                     droppedItems.push(dropData);
-                    showAlert("🍠 성곽에서 맛있는 군고구마가 배급되었습니다! 강아지가 소환됩니다.");
+                    showAlert("🔥🍠 성곽에서 맛있는 군고구마가 배급되었습니다! 강아지가 소환됩니다.");
                     
                     // 강아지 한 마리가 바닥 고구마를 쫓아가도록 스폰
                     setTimeout(() => spawnPuppy(dropData, false), 1000);
