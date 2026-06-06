@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>볼케이노 타이쿤: 퀘스트 마스터</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #D49A6A; 
+            font-family: 'Comic Sans MS', 'Jua', sans-serif; 
+            user-select: none; 
+            touch-action: none; 
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            box-sizing: border-box;
+            width: 100vw;
+            height: 100dvh;
+        }
+        
+        #viewport { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        
+        #game-board { position: absolute; width: 3000px; height: 3000px; transform-origin: 0 0; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px), url('stardew_bg.png'); background-size: 30px 30px, 30px 30px, 400px 400px; overflow: hidden; }
+        
+        #volcano { position: absolute; left: 1500px; top: 1500px; transform: translate(-50%, -50%); width: 150px; height: 150px; background: url('volcano_processed.webp') no-repeat center/contain; cursor: pointer; z-index: 10; transition: transform 0.1s; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
+        #volcano:active { transform: translate(-50%, -50%) scale(0.95); }
+        #volcano.cooldown { filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)) grayscale(100%); cursor: not-allowed; opacity: 0.85; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-55%, -45%) rotate(-5deg); } 50% { transform: translate(-45%, -55%) rotate(5deg); } 75% { transform: translate(-55%, -55%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
+
+        .particle { position: absolute; width: 70px; height: 70px; cursor: pointer; z-index: 19000; transition: top 1s cubic-bezier(0.25, 1, 0.5, 1), left 1s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
+        .particle:active { transform: scale(0.9); }
+        
+        .crop, .tourist { position: absolute; font-size: 40px; cursor: pointer; z-index: 19000; animation: bounceIn 0.5s; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); }
+        @keyframes bounceIn { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        .emotion { position: absolute; font-size: 16px; animation: floatUp 2s forwards; z-index: 19500; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 20% { transform: translateY(-10px) scale(1.2); } 100% { opacity: 0; transform: translateY(-40px) scale(1); } }
+
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20000; }
+        
+        #inventory { position: absolute; top: 15px; left: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 20px; display: flex; flex-wrap: nowrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; }
+        .inv-item { display: flex; align-items: center; font-size: 16px; font-weight: bold; background: #eee; padding: 4px 10px; border-radius: 10px; }
+        .inv-item img, .inv-item span.icon { width: 25px; height: 25px; margin-right: 5px; font-size: 20px; line-height: 25px; display: inline-block; text-align: center; }
+        
+        #shop-toggle-btn { position: absolute; top: 15px; right: 15px; pointer-events: auto; background: #FF9800; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #E65100; box-shadow: 0 4px 0 #E65100; cursor: pointer; z-index: 20001; }
+        #shop-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #E65100; }
+        #shop { position: absolute; top: 60px; right: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; width: 350px; height: 60vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; display: none; }
+        #quest-toggle-btn { position: absolute; top: 15px; right: 175px; pointer-events: auto; background: #E6C229; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #C4A000; box-shadow: 0 4px 0 #C4A000; cursor: pointer; z-index: 20001; }
+        #quest-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #C4A000; }
+        #quest-panel { position: absolute; top: 60px; right: 175px; pointer-events: auto; background: rgba(255,250,200,0.95); padding: 15px; border-radius: 15px; width: 280px; height: 35vh; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #E6C229; display: none; }
+        
+        .panel-title { text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 12px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 8px; }
+        
+        .shop-item { display: flex; align-items: center; background: #fff; border: 2px solid #ddd; border-radius: 10px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .shop-item:active { transform: scale(0.98); }
+        .shop-item .icon-box { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 40px; background: #f5f5f5; border-radius: 10px; margin-right: 12px; }
+        .shop-item .icon-box img { max-width: 100%; max-height: 100%; }
+        .shop-item .info { flex: 1; }
+        .shop-item .name { font-weight: bold; font-size: 18px; color: #333; margin-bottom: 4px; }
+        .shop-item .desc { font-size: 13px; color: #007BFF; margin-bottom: 6px; word-break: keep-all; line-height: 1.3; }
+        .shop-item .cost { font-size: 14px; color: #666; font-weight: bold; display: flex; flex-wrap: wrap; gap: 6px; }
+        .shop-item .cost span { display: flex; align-items: center; }
+        .shop-item .cost img { width: 16px; height: 16px; margin-right: 4px; }
+
+        .quest-item { background: #fff; border: 2px dashed #E6C229; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: bold; }
+        .quest-item.done { background: #d4edda; border-style: solid; border-color: #28a745; color: #155724; text-decoration: line-through; }
+        .quest-title { color: #E6C229; margin-bottom: 3px; font-size: 14px; }
+        .quest-item.done .quest-title { color: #28a745; }
+
+        /* 공통 모달 배경 스타일 */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 30000;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            box-sizing: border-box;
+        }
+
+        /* 공통 모달 콘텐츠 스타일 */
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            border: 6px solid #000;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            box-sizing: border-box;
+            animation: bounceInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        @keyframes bounceInModal {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 공통 닫기 버튼 스타일 */
+        .close-btn {
+            background: #FF5722;
+            color: white;
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            margin-top: 15px;
+            transition: all 0.1s;
+        }
+        .close-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        /* 1. 퀴즈 문제 창 UI 개선 (더 감각적이고 두꺼운 테두리 및 그림자) */
+        #quiz-modal .modal-content {
+            border: 8px solid #FF5722;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFF9F6;
+            width: 580px; /* 퀴즈창 가로로 더 키움 */
+            max-width: 95%;
+        }
+
+        /* 퀘스트 도착 모달 스타일 */
+        #quest-alert-modal .modal-content {
+            border: 8px solid #E6C229;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFFAEE;
+            width: 540px;
+            max-width: 95%;
+        }
+
+        /* 퀘스트 완료 모달 스타일 */
+        #quest-complete-modal .modal-content {
+            border: 8px solid #28a745;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #F0FDF4;
+            width: 540px;
+            max-width: 95%;
+        }
+
+        /* 2. 문제 글씨 크기 키우기 */
+        #quiz-q {
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1.4;
+            color: #E64A19 !important;
+            margin-bottom: 25px;
+            word-break: keep-all;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        /* 2. 선택지 버튼 크기 줄이기 및 감각적인 스타일 */
+        #quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            background: #FFF;
+            border: 4px solid #000;
+            border-radius: 14px;
+            padding: 10px 16px; /* 버튼 크기 줄임 */
+            font-size: 16px;     /* 버튼 글씨 크기 줄임 */
+            font-weight: 800;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            transition: all 0.1s;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+            margin: 0;
+        }
+
+        .quiz-option:hover {
+            background: #E3F2FD;
+            border-color: #2196F3;
+            color: #0D47A1;
+        }
+
+        .quiz-option:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        
+        /* 건물/강아지 관련 스타일 */
+        #building-modal .modal-content {
+            border: 8px solid #FF5722;
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            background: #FFF;
+            width: 540px;
+            max-width: 90%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .building-action-btn { 
+            padding: 16px; 
+            background: #4CAF50; 
+            color: white; 
+            border: 4px solid #000; 
+            border-radius: 14px; 
+            font-size: 20px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            display: block; 
+            width: 100%; 
+            box-sizing: border-box; 
+            margin-bottom: 8px;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .building-action-btn:active { 
+            transform: translate(2px, 2px); 
+            box-shadow: 2px 2px 0 #000;
+        }
+        .building-action-btn.move-btn { background: #2196F3; }
+        .building-action-btn.demo-btn { background: #f44336; }
+        .building-action-btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            transform: none; 
+            border-color: #777;
+        }
+        .top-right-btn {
+            width: 54px;
+            height: 40px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            box-shadow: 3px 3px 0 #000;
+        }
+        .top-right-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        .top-right-btn.move-btn { background: #2196F3; }
+        .top-right-btn.demo-btn { background: #f44336; }
+
+        
+        .puppy { position: absolute; font-size: 40px; z-index: 19000; animation: bounceIn 0.5s; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); transition: left 0.5s linear, top 0.5s linear; pointer-events: none; }
+        .puppy.knight { font-size: 45px; filter: drop-shadow(0 5px 10px rgba(255,215,0,0.5)); }
+        .golden-puppy { position: absolute; font-size: 60px; filter: drop-shadow(0 0 20px rgba(255,215,0,1)); animation: glow 1s infinite alternate; transition: left 1s linear, top 1s linear; z-index: 19000; pointer-events: none; }
+        @keyframes glow { from { filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); } to { filter: drop-shadow(0 0 25px rgba(255,215,0,1)); } }
+
+        
+        /* 스프라이트 애니메이션 CSS */
+        .tourist-sprite, .tourist-woman-sprite, .explorer-m-sprite, .explorer-f-sprite, .photographer-sprite, .puppy-sprite, .golden-puppy-sprite {
+            position: absolute;
+            width: 32px; height: 32px;
+            background-size: 128px 128px;
+            z-index: 19000;
+            transition: left 0.5s linear, top 0.5s linear;
+            pointer-events: none;
+            background-repeat: no-repeat;
+        }
+        .tourist-sprite { background-image: url('tourist_sprite.png'); }
+        .tourist-woman-sprite { background-image: url('tourist_woman_sprite.png'); }
+        .explorer-m-sprite { background-image: url('explorer_m_sprite.png'); }
+        .explorer-f-sprite { background-image: url('explorer_f_sprite.png'); }
+        .photographer-sprite { background-image: url('photographer_sprite.png'); }
+        .puppy-sprite { background-image: url('puppy_sprite.png'); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+        .golden-puppy-sprite { 
+            background-image: url('puppy_sprite.png');
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)) sepia(1) saturate(5) hue-rotate(-20deg);
+            width: 48px; height: 48px;
+            background-size: 192px 192px;
+        }
+        .puppy-knight { filter: drop-shadow(0 0 5px rgba(200,200,255,0.8)); }
+        
+        @keyframes walk-normal { from { background-position-x: 0px; } to { background-position-x: -128px; } }
+        @keyframes walk-golden { from { background-position-x: 0px; } to { background-position-x: -192px; } }
+
+        .walk-down { background-position-y: 0px; }
+        .walk-up { background-position-y: -32px; }
+        .walk-right { background-position-y: -64px; }
+        .walk-left { background-position-y: -96px; }
+
+        .tourist-sprite.walk-down, .tourist-sprite.walk-up, .tourist-sprite.walk-right, .tourist-sprite.walk-left,
+        .tourist-woman-sprite.walk-down, .tourist-woman-sprite.walk-up, .tourist-woman-sprite.walk-right, .tourist-woman-sprite.walk-left,
+        .explorer-m-sprite.walk-down, .explorer-m-sprite.walk-up, .explorer-m-sprite.walk-right, .explorer-m-sprite.walk-left,
+        .explorer-f-sprite.walk-down, .explorer-f-sprite.walk-up, .explorer-f-sprite.walk-right, .explorer-f-sprite.walk-left,
+        .photographer-sprite.walk-down, .photographer-sprite.walk-up, .photographer-sprite.walk-right, .photographer-sprite.walk-left,
+        .puppy-sprite.walk-down, .puppy-sprite.walk-up, .puppy-sprite.walk-right, .puppy-sprite.walk-left {
+            animation: walk-normal 0.6s steps(4) infinite;
+        }
+
+        .golden-puppy-sprite.walk-down { background-position-y: 0px; }
+        .golden-puppy-sprite.walk-up { background-position-y: -48px; }
+        .golden-puppy-sprite.walk-right { background-position-y: -96px; }
+        .golden-puppy-sprite.walk-left { background-position-y: -144px; }
+        .golden-puppy-sprite.walk-down, .golden-puppy-sprite.walk-up, .golden-puppy-sprite.walk-right, .golden-puppy-sprite.walk-left {
+            animation: walk-golden 0.6s steps(4) infinite;
+        }
+        .idle { animation: none !important; background-position-x: 0px !important; }
+
+        /* 건축물 기본 속성 */
+        .building { position: absolute; user-select: none; touch-action: none; display: flex; justify-content: center; align-items: center; }
+        .building.draggable { cursor: grab; }
+        .building.draggable:active { cursor: grabbing; filter: brightness(1.1); }
+        
+        .size-1 { width: 30px; height: 30px; font-size: 20px; }
+        .size-2 { width: 60px; height: 60px; font-size: 40px; }
+        .size-3 { width: 90px; height: 90px; font-size: 50px; }
+
+        .obj-3d { filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); background: rgba(255,255,255,0.5); border: 2px dashed #aaa; border-radius: 10px; }
+        .obj-3d.has-img { background: transparent; border: none; }
+        .obj-tile { z-index: 5 !important; border: 1px dashed rgba(255,255,255,0.3); }
+        
+        /* 특수 기능 효과 */
+        .oven-fire { position: absolute; bottom: 0; font-size: 40px; animation: flicker 0.5s infinite alternate; pointer-events: none; display: none; }
+        @keyframes flicker { 0% { opacity: 0.8; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
+        @keyframes floatAndBounce {
+            0% { transform: translate(-50%, 0) scale(0.95); }
+            100% { transform: translate(-50%, -8px) scale(1.05); }
+        }
+        @keyframes craterGoldFloat {
+            0% { transform: translate(-50%, -50%) scale(0.85); filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); }
+            100% { transform: translate(-50%, -75%) scale(1.25); filter: drop-shadow(0 0 30px rgba(255,215,0,1)) drop-shadow(0 0 8px #fff); }
+        }
+
+        #alert-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; z-index: 40000; opacity: 0; pointer-events: none; transition: opacity 0.4s; text-align: center; line-height: 1.4; background: rgba(0, 0, 0, 0.85); padding: 15px 30px; border-radius: 20px; border: 4px solid #fff; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); }
+        #alert-text.success { background: rgba(46, 125, 50, 0.95) !important; border-color: #A5D6A7 !important; }
+        #alert-text.error { background: rgba(198, 40, 40, 0.95) !important; border-color: #EF9A9A !important; }
+        #alert-text.info { background: rgba(0, 0, 0, 0.85) !important; border-color: #fff !important; }
+        
+        /* 훈장 표시기 */
+        #medals-container { position: absolute; top: 130px; left: 15px; display: flex; gap: 5px; font-size: 30px; pointer-events: none; z-index: 20000;}
+        
+        #zoom-controls { position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 30000; pointer-events: auto; }
+        .zoom-btn { background: rgba(255,255,255,0.95); border: 2px solid #555; border-radius: 12px; width: 55px; height: 55px; font-size: 26px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; }
+        .zoom-btn:active { transform: scale(0.9); }
+
+        @media (max-width: 900px) {
+            #inventory {
+                top: 10px; left: 10px; right: 10px;
+                flex-wrap: wrap; justify-content: flex-start;
+                padding: 5px; gap: 5px;
+            }
+            .inv-item { font-size: 14px; padding: 2px 6px; }
+            .inv-item img, .inv-item span.icon { width: 20px; height: 20px; font-size: 16px; margin-right: 2px; }
+            
+            #shop-toggle-btn { top: auto; bottom: 15px; right: 15px; z-index: 20002; font-size: 15px; padding: 8px 12px; }
+            #shop { top: 10vh; right: 15px; width: calc(100vw - 30px); max-width: 320px; height: 75vh; }
+            
+            #quest-toggle-btn { top: auto; bottom: 15px; right: 130px; z-index: 20002; font-size: 15px; padding: 8px 12px; }
+            #quest-panel { top: 10vh; right: 15px; width: calc(100vw - 30px); max-width: 320px; height: 50vh; }
+            
+            #zoom-controls { bottom: 70px; right: 15px; }
+            #medals-container { top: auto; bottom: 15px; left: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="viewport">
+        <div id="game-board">
+            <div id="volcano" class="obj-3d has-img"></div>
+        </div>
+        
+        <div id="alert-text"></div>
+        
+        <div id="ui-layer">
+            <div id="inventory">
+                <div class="inv-item" onclick="showResInfo('gas', '화산 가스', '화산 분출물 중 기체 상태입니다. 대부분 수증기이고 이산화 탄소 등도 포함됩니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="gas_processed.webp">화산 가스: <span id="inv-gas">0</span></div>
+                <div class="inv-item" onclick="showResInfo('lava', '용암', '화산 분출물 중 액체 상태입니다. 마그마가 지표로 흘러나온 것으로, 식으면 암석이 됩니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="lava_processed.webp">용암: <span id="inv-lava">0</span></div>
+                <div class="inv-item" onclick="showResInfo('ash', '화산재', '화산 분출물 중 고체 상태입니다. 아주 작은 알갱이로 바람을 타고 멀리 날아갈 수 있으며, 나중에는 땅을 비옥하게 합니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="ash_processed.webp">화산재: <span id="inv-ash">0</span></div>
+                <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
+                <div class="inv-item" title="고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
+                <div class="inv-item" title="용암 군고구마"><img src="roasted_potato.webp" style="width:24px; height:24px; object-fit:contain; vertical-align:middle; margin-right:5px;"><span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
+            </div>
+            
+            <div id="medals-container"></div>
+            
+            <button id="quest-toggle-btn" onclick="toggleQuest()">📜 퀘스트 열기</button>
+            <button id="shop-toggle-btn" onclick="toggleShop()">🛒 상점 열기</button>
+            <div id="shop">
+                <div class="panel-title">상점 (드래그로 겹쳐짓기)</div>
+                <div id="shop-items"></div>
+            </div>
+            
+            <div id="quest-panel">
+                <div class="panel-title">📜 진행중인 퀘스트</div>
+                <div id="quest-items"></div>
+            </div>
+            
+            <div id="zoom-controls">
+                <button class="zoom-btn" onclick="changeZoom(0.2)">➕</button>
+                <button class="zoom-btn" onclick="changeZoom(-0.2)">➖</button>
+            </div>
+        </div>
+        
+        <div id="quest-alert-modal" class="modal-bg" style="display: none;">
+            <div class="modal-content">
+                <h2 style="color: #E6C229; font-size: 32px; font-weight: 900; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">📜 새로운 퀘스트 도착!</h2>
+                <div id="quest-alert-title" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #D84315;">퀘스트 제목</div>
+                <div id="quest-alert-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold; background: #FFFDE7; border: 3px dashed #E6C229; padding: 15px; border-radius: 12px;">퀘스트 설명</div>
+                <button class="close-btn" style="background: #E6C229; color: white; width: 100%; font-size: 20px; font-weight: 900; padding: 12px;" onclick="document.getElementById('quest-alert-modal').style.display='none'; updateUI();">수락하기</button>
+            </div>
+        </div>
+        
+        <div id="quest-complete-modal" class="modal-bg" style="display: none;">
+            <div class="modal-content">
+                <h2 style="color: #28a745; font-size: 32px; font-weight: 900; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">🎉 퀘스트 완료!</h2>
+                <div id="quest-complete-title" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #155724;">퀘스트 제목</div>
+                <div id="quest-complete-desc" style="font-size: 18px; color: #333; margin-bottom: 25px; line-height: 1.5; font-weight: bold; background: #E8F5E9; border: 3px dashed #28a745; padding: 15px; border-radius: 12px;">보상 내용</div>
+                <button class="close-btn" style="background: #28a745; color: white; width: 100%; font-size: 20px; font-weight: 900; padding: 12px;" onclick="closeQuestComplete()">확인</button>
+            </div>
+        </div>
+        
+        <div id="quiz-modal" class="modal-bg" style="display: none;">
+            <div class="modal-content">
+                <h2 id="quiz-q">질문</h2>
+                <div id="quiz-options"></div>
+                <button class="close-btn" onclick="document.getElementById('quiz-modal').style.display='none'">닫기</button>
+            </div>
+        </div>
+        
+        <div id="res-info-modal" class="modal-bg" style="display: none; z-index: 35000;" onclick="this.style.display='none'">
+            <div class="modal-content" style="max-width: 400px; padding: 20px;" onclick="event.stopPropagation()">
+                <div style="font-size: 50px; margin-bottom: 10px;" id="res-info-icon"></div>
+                <h2 id="res-info-title" style="margin: 0 0 10px 0; color: #FF5722; font-size: 24px;">이름</h2>
+                <div id="res-info-desc" style="font-size: 16px; font-weight: bold; color: #333; line-height: 1.5; margin-bottom: 20px; word-break: keep-all;">설명</div>
+                <button class="close-btn" style="margin-top: 0;" onclick="document.getElementById('res-info-modal').style.display='none'">확인</button>
+            </div>
+        </div>
+        
+        
+        <div id="building-modal" class="modal-bg" style="display: none; z-index: 35000;" onclick="closeBuildingModal()">
+            <div class="modal-content" style="position: relative;" onclick="event.stopPropagation()">
+                <div style="position: absolute; top: 25px; right: 25px; display: flex; gap: 8px;">
+                    <button class="top-right-btn move-btn" onclick="moveCurrentBuilding()">이동</button>
+                    <button class="top-right-btn demo-btn" onclick="demolishCurrentBuilding()">철거</button>
+                </div>
+                <div style="font-size: 70px; margin-bottom: 15px;" id="bm-icon"></div>
+                <h2 id="bm-title" style="margin: 0 0 10px 0; color: #FF5722; font-size: 32px; font-weight: 900; word-break: keep-all; text-shadow: 1px 1px 0px rgba(0,0,0,0.1); padding-right: 130px;">이름</h2>
+                <div id="bm-desc" style="font-size: 18px; color: #555; margin-bottom: 20px; word-break: keep-all; line-height: 1.5; font-weight: bold; background: #f5f5f5; padding: 15px; border-radius: 12px; border: 3px dashed #ccc;">설명</div>
+                <div id="bm-custom-ui" style="margin-bottom: 20px; width: 100%;"></div>
+                
+                <button class="close-btn" style="width: 100%; margin-top: 15px; font-size: 18px; font-weight: 900; background: #757575; color: white; border: 4px solid #000; box-shadow: 4px 4px 0 #000;" onclick="closeBuildingModal()">닫기</button>
+            </div>
+        </div>
+
+
+
+        <div id="instructions-modal" class="modal-bg" style="display: flex; z-index: 50000;">
+            <div class="modal-content" style="max-width: 600px; padding: 40px; border: 8px solid #000; border-radius: 24px; box-shadow: 12px 12px 0px #000; background-color: #FFF;">
+                <h2 style="font-size: 40px; font-weight: 900; color: #000; margin-bottom: 30px; text-align: center; letter-spacing: -1px; text-shadow: 3px 3px 0px #FF5722; word-break: keep-all;">🌋 게임 방법</h2>
+                <div style="text-align: left; font-size: 24px; line-height: 1.5; margin-bottom: 40px; color: #000; word-break: keep-all; font-weight: 800;">
+                    <div style="margin-bottom: 25px; padding: 25px; background: #E3F2FD; border: 5px solid #000; border-radius: 16px; box-shadow: 6px 6px 0px #000;">
+                        1. 중앙 화산을 클릭하여 문제를 푸세요.<br>정답을 맞추면 화산 분출물이 나옵니다.
+                    </div>
+                    <div style="padding: 25px; background: #FFF9C4; border: 5px solid #000; border-radius: 16px; box-shadow: 6px 6px 0px #000;">
+                        2. 획득한 화산 분출물로 건물을 지어보세요.
+                    </div>
+                </div>
+                <button class="close-btn" style="background: #FF5722; color: #FFF; font-size: 28px; font-weight: 900; padding: 20px 40px; width: 100%; box-sizing: border-box; border: 6px solid #000; border-radius: 16px; box-shadow: 8px 8px 0px #000; cursor: pointer; transition: all 0.1s; letter-spacing: 1px;" onmousedown="this.style.transform='translate(4px, 4px)'; this.style.boxShadow='4px 4px 0px #000';" onmouseup="this.style.transform='none'; this.style.boxShadow='8px 8px 0px #000';" onclick="document.getElementById('instructions-modal').style.display='none'">게임 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inventory = { gas: 0, lava: 0, ash: 0, rock: 0, potato: 0, roasted: 0, golden_potato: 0, tourists: 0 };
+        const resTypes = ['gas', 'lava', 'ash', 'rock'];
+        
+        let placedBuildings = [];
+        let quizzesAnswered = 0;
+        let currentQuiz = null;
+        let dayTick = 0; 
+        
+        // Panning logic
+        let boardX = (window.innerWidth / 2) - 1500;
+        let boardY = (window.innerHeight / 2) - 1500;
+        let zoomLevel = 1.0;
+        const board = document.getElementById('game-board');
+        
+        function updateTransform() {
+            board.style.transform = `translate(${boardX}px, ${boardY}px) scale(${zoomLevel})`;
+        }
+        updateTransform();
+        
+        function changeZoom(delta) {
+            let oldZoom = zoomLevel;
+            zoomLevel += delta;
+            if(zoomLevel < 0.4) zoomLevel = 0.4;
+            if(zoomLevel > 2.0) zoomLevel = 2.0;
+            
+            let cx = window.innerWidth / 2;
+            let cy = window.innerHeight / 2;
+            boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+            boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+            updateTransform();
+        }
+        
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+        let initialPinchDistance = null;
+        let initialZoomLevel = 1.0;
+
+        document.getElementById('viewport').addEventListener('mousedown', (e) => {
+            if(e.target === board || e.target.closest('#volcano')) {
+                isPanning = true;
+                panStartX = e.clientX - boardX;
+                panStartY = e.clientY - boardY;
+                board.style.cursor = 'grabbing';
+            }
+        });
+        document.addEventListener('mousemove', (e) => {
+            if(isPanning) {
+                boardX = e.clientX - panStartX;
+                boardY = e.clientY - panStartY;
+                updateTransform();
+            }
+        });
+        document.addEventListener('mouseup', () => {
+            if(isPanning) {
+                isPanning = false;
+                board.style.cursor = '';
+            }
+        });
+
+        // Wheel zoom logic
+        document.getElementById('viewport').addEventListener('wheel', (e) => {
+            if (e.target.closest('#shop') || e.target.closest('#quest-panel') || e.target.closest('.modal-content')) return;
+            let oldZoom = zoomLevel;
+            let zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            zoomLevel *= zoomFactor;
+            
+            if(zoomLevel < 0.4) zoomLevel = 0.4;
+            if(zoomLevel > 2.0) zoomLevel = 2.0;
+            
+            let cx = e.clientX;
+            let cy = e.clientY;
+            
+            boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+            boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+            updateTransform();
+        }, {passive: true});
+        
+        function getDistance(touch1, touch2) {
+            let dx = touch1.clientX - touch2.clientX;
+            let dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx*dx + dy*dy);
+        }
+
+        document.getElementById('viewport').addEventListener('touchstart', (e) => {
+            if(e.touches.length === 1 && (e.target === board || e.target.closest('#volcano'))) {
+                isPanning = true;
+                panStartX = e.touches[0].clientX - boardX;
+                panStartY = e.touches[0].clientY - boardY;
+            } else if(e.touches.length === 2) {
+                isPanning = false;
+                initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+                initialZoomLevel = zoomLevel;
+            }
+        }, {passive: false});
+        
+        document.addEventListener('touchmove', (e) => {
+            if(isPanning && e.touches.length === 1) {
+                e.preventDefault(); 
+                boardX = e.touches[0].clientX - panStartX;
+                boardY = e.touches[0].clientY - panStartY;
+                updateTransform();
+            } else if(e.touches.length === 2 && initialPinchDistance) {
+                e.preventDefault();
+                let currentDistance = getDistance(e.touches[0], e.touches[1]);
+                let scale = currentDistance / initialPinchDistance;
+                
+                let oldZoom = zoomLevel;
+                zoomLevel = initialZoomLevel * scale;
+                if(zoomLevel < 0.4) zoomLevel = 0.4;
+                if(zoomLevel > 2.0) zoomLevel = 2.0;
+                
+                let cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                let cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                
+                boardX = cx - (cx - boardX) * (zoomLevel / oldZoom);
+                boardY = cy - (cy - boardY) * (zoomLevel / oldZoom);
+                updateTransform();
+            }
+        }, {passive: false});
+        
+        document.addEventListener('touchend', (e) => { 
+            if(e.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+            if(e.touches.length === 0) {
+                isPanning = false; 
+            } else if (e.touches.length === 1 && !isPanning) {
+                isPanning = true;
+                panStartX = e.touches[0].clientX - boardX;
+                panStartY = e.touches[0].clientY - boardY;
+            }
+        });
+
+        const items = {
+            // Size 1
+            wall: { name: '현무암 돌담', type: '3d', size: 1, img: 'wall_processed.webp', desc: '용암이 식어 굳어진 구멍 뚫린 암석', cost: { rock: 3, ash: 1 } },
+            bomb: { name: '화산탄 조각상', type: '3d', size: 1, img: 'bomb_processed.webp', desc: '공중에서 굳어진 커다란 화산 암석 조각', cost: { lava: 5, gas: 5 } },
+            pillar: { name: '주상절리 육각 기둥', type: '3d', size: 1, img: 'pillar_processed.webp', desc: '용암이 빠르게 식으면서 기둥 모양으로 굳어짐', cost: { lava: 5, rock: 5 } },
+            
+            // Size 2
+            hot: { name: '천연 화산 온천', type: '3d', size: 2, img: 'hot_processed.webp', desc: '지하수가 마그마에 의해 데워져 솟아남', cost: { gas: 15, rock: 10 } },
+            harubang: { name: '현무암 조각 공원', type: '3d', size: 2, img: 'harubang_processed.webp', desc: '현무암을 조각하여 만든 훌륭한 관광 자원', cost: { lava: 10, rock: 20 } },
+            pond: { name: '부석 미니 연못', type: '3d', size: 2, img: 'pond_processed.webp', desc: '가스가 빠져나가 구멍이 많은 가벼운 암석', cost: { gas: 15, rock: 5 } },
+            oven: { name: '마그마 돌 화덕', type: '3d', size: 2, img: 'oven_processed.webp', desc: '마그마의 뜨거운 열로 고구마를 구울 수 있는 화덕', cost: { lava: 15, rock: 5 } },
+            sand: { name: '검은 모래 해변', type: '3d', size: 2, img: 'sand_processed.webp', desc: '현무암이 잘게 부서져 만들어진 검은 모래 해변', cost: { ash: 10, rock: 2 } },
+            
+            // Size 3
+            farm: { name: '비옥한 화산재 농장', type: '3d', size: 3, img: 'farm_basic_processed.webp', desc: '화산재가 흙에 섞여 땅을 걸름지게 함', cost: { ash: 25, lava: 5 } },
+            castle: { name: '단단한 현무암 성곽', type: '3d', size: 3, img: 'castle_processed.webp', desc: '단단한 암석 조각들을 쌓아 만든 방어벽', cost: { lava: 20, rock: 25, ash: 5 } },
+            power: { name: '지열 발전소', type: '3d', size: 3, img: 'power_processed.webp', desc: '마그마의 엄청난 열에너지로 전기를 생산', cost: { gas: 30, lava: 10 } },
+            crater: { name: '분화구 호수', type: '3d', size: 3, img: 'crater_processed.webp', desc: '분화구(마그마가 나온 구멍)에 맑은 물이 고인 호수', cost: { ash: 5, rock: 5, gas: 5 } }
+        };
+
+                const quests = [
+            { id: 'q1', title: '구멍 숭숭 현무암 돌담', desc: '현무암 돌담 2개 건설하기', condition: () => countB('wall') >= 2, done: false, dict: '현무암은 마그마가 지표 부근에서 식어 만들어지며 어두운색에 가스가 빠져나간 구멍이 뚫려 있기도 합니다.' },
+            { id: 'q2', title: '신비로운 육각 기둥', desc: '주상절리 육각 기둥 1개 건설하기', condition: () => countB('pillar') >= 1, done: false, dict: '용암이 빠르게 식으면서 수축하여 육각형 기둥 모양으로 갈라져 단단하게 굳어진 지형을 주상절리라고 합니다.' },
+            { id: 'q3', title: '피로를 풀어주는 물', desc: '천연 화산 온천 1개 건설하기', condition: () => countB('hot') >= 1, done: false, dict: '지하수가 땅속 깊은 마그마의 뜨거운 열기에 의해 데워져 솟아나는 것을 온천이라고 부릅니다.' },
+            { id: 'q4', title: '하늘에서 떨어진 화산탄', desc: '화산탄 조각상 1개 건설하기', condition: () => countB('bomb') >= 1, done: false, dict: '화산 분출 시 공중으로 날아간 용암 조각이 돌면서 식어 굳어지면 타원체나 고구마 모양의 화산탄이 만들어집니다.' },
+            { id: 'q5', title: '풍요를 품은 화산재', desc: '비옥한 화산재 농장 1개 건설하기', condition: () => countB('farm') >= 1, done: false, dict: '화산재는 초기엔 시야를 가리거나 식물에 해를 입히기도 하지만, 시간이 지나면 흙을 비옥하게 만들어 농작물이 잘 자라게 돕습니다.' },
+            { id: 'q6', title: '지구의 뜨거운 화덕', desc: '마그마 돌 화덕 1개 건설하기', condition: () => countB('oven') >= 1, done: false, dict: '마그마의 강력하고 풍부한 열기는 지열 에너지를 이용한 요리나 친환경 발전 등에 다양하게 활용될 수 있습니다.' },
+            { id: 'q7', title: '노릇노릇 군고구마', desc: '용암 군고구마 3개 만들기', condition: () => inventory.roasted >= 3, done: false, dict: '마그마 돌 화덕의 뜨거운 열기를 이용하면 아주 달콤하고 맛있는 용암 군고구마를 구워낼 수 있습니다.' },
+            { id: 'q8', title: '돌하르방의 지혜', desc: '현무암 조각 공원 1개 건설하기', condition: () => countB('harubang') >= 1, done: false, dict: '현무암은 단단하면서 깎기 적당하여 돌하르방과 같은 조각 예술품을 만들기 아주 좋은 지질학적 자원입니다.' },
+            { id: 'q9', title: '물에 뜨는 신기한 돌', desc: '부석 미니 연못 1개 건설하기', condition: () => countB('pond') >= 1, done: false, dict: '용암이 식을 때 가스가 빠져나가 구멍이 숭숭 뚫려 물에 뜰 정도로 가벼워진 암석을 부석이라고 합니다.' },
+            { id: 'q10', title: '검은 모래 해변의 매력', desc: '검은 모래 해변 1개 건설하기', condition: () => countB('sand') >= 1, done: false, dict: '현무암질 모래가 파도와 바람에 깎이고 해안에 쌓이면서 검은 빛깔을 띠는 독특하고 아름다운 검은 모래 해변이 생겨납니다.' },
+            { id: 'q11', title: '초비옥 농장 업그레이드', desc: '농장을 초비옥 화산재 농장으로 업그레이드하기', condition: () => placedBuildings.filter(b => b.key === 'farm' && b.el.dataset.upgraded === "true").length >= 1, done: false, dict: '화산재 농장은 화산재 20개를 투입해 더욱 비옥하게 개간할 수 있으며, 개간 시 고구마 자라는 속도가 2배 빨라집니다.' },
+            { id: 'q12', title: '지구가 주는 엄청난 전기', desc: '지열 발전소 1개 건설하기', condition: () => countB('power') >= 1, done: false, dict: '화산 주변 땅속 깊은 마그마의 엄청난 열을 이용해 친환경적인 전기를 생산하는 방식을 지열 발전이라고 합니다.' },
+            { id: 'q13', title: '천지와 백록담의 전설', desc: '분화구 호수 1개 건설하기', condition: () => countB('crater') >= 1, done: false, dict: '화산 꼭대기에 마그마가 뿜어져 나왔던 웅덩이(분화구)에 오랜 시간 물이 고여 백두산 천지나 한라산 백록담 같은 호수가 생겨납니다.' },
+            { id: 'q14', title: '철통 보안 현무암 성곽', desc: '단단한 현무암 성곽 1개 건설하기', condition: () => countB('castle') >= 1, done: false, dict: '현무암은 단단하고 튼튼한 성질을 지니고 있어 방어용 성곽이나 튼튼한 장벽을 건축하는 데 최적의 재료로 쓰였습니다.' },
+            { id: 'q15', title: '용맹한 기사 강아지', desc: '기사 강아지 1마리 이상 육성하기', condition: () => puppiesList.filter(p => p.isKnight).length >= 1, done: false, dict: '튼튼한 현무암 성곽에서 군고구마를 던져주면 지나가던 일반 강아지가 성으로 가 고구마를 먹고 훈련을 마친 멋진 기사 강아지가 됩니다.' },
+            { id: 'q16', title: '화산 가스의 힘', desc: '화산 가스 30개 보유하기', condition: () => inventory.gas >= 30, done: false, dict: '화산 가스는 화산 분출 시 나오는 기체 물질로, 수증기가 대부분을 차지하며 이산화 탄소와 이산화 황 등의 성분이 섞여 있습니다.' },
+            { id: 'q17', title: '화산 자원의 조화', desc: '가스, 용암, 화산재, 암석 각각 10개 이상 보유하기', condition: () => inventory.gas >= 10 && inventory.lava >= 10 && inventory.ash >= 10 && inventory.rock >= 10, done: false, dict: '화산이 분출할 때는 기체 상태(화산 가스), 액체 상태(용암), 고체 상태(화산재, 화산 암석 조각)의 다양한 분출물들이 동시에 쏟아져 나옵니다.' },
+            { id: 'q18', title: '세계적인 관광 명소', desc: '누적 관광객 15명 달성하기', condition: () => inventory.tourists >= 15, done: false, medal: '🥈', dict: '주상절리나 온천, 분화구 호수 등 화산 활동으로 형성된 지형들은 매우 아름다워 사람들이 많이 찾는 훌륭한 관광 명소가 됩니다.' },
+            { id: 'q19', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' }
+        ];
+
+        const questions = [
+            { q: "땅속 깊은 곳에서 암석이 녹은 물질은 무엇일까요?", opts: ["화산 가스", "마그마", "지하수", "화산재"], a: 1, exp: "마그마는 땅속 깊은 곳에 있는 암석이 높은 열에 의해 녹아 있는 물질입니다." },
+            { q: "화산 활동으로 나오는 물질 중 액체 상태인 것은 무엇일까요?", opts: ["화산 가스", "화산재", "용암", "화산 암석 조각"], a: 2, exp: "용암은 마그마가 지표면으로 흘러나온 액체 상태의 물질입니다." },
+            { q: "화산 활동으로 나오는 기체로, 대부분 수증기로 이루어진 것은?", opts: ["산소", "이산화 탄소", "화산 가스", "질소"], a: 2, exp: "화산 가스는 화산 폭발 시 나오는 기체 분출물입니다." },
+            { q: "화산 활동으로 나오는 물질 중 고체 상태로 크기가 가장 작은 것은 무엇일까요?", opts: ["화산재", "용암", "화산 가스", "마그마"], a: 0, exp: "화산재는 고체 분출물 중 크기가 매우 작고 가벼운 물질입니다." },
+            { q: "화산 꼭대기에 움푹 파여 물이 고이기도 하는 곳을 무엇이라고 할까요?", opts: ["분화구", "온천", "계곡", "지하수"], a: 0, exp: "화산 꼭대기에 움푹 파인 곳을 분화구라고 하며, 이곳에 물이 고여 호수가 생기기도 합니다." },
+            { q: "마그마가 식어서 만들어진 암석을 무엇이라고 부를까요?", opts: ["퇴적암", "화성암", "변성암", "이암"], a: 1, exp: "마그마가 식어 만들어진 암석을 화성암이라고 합니다." },
+            { q: "색깔이 어둡고 표면에 구멍이 뚫려 있기도 한 암석은 무엇일까요?", opts: ["화강암", "현무암", "대리암", "사암"], a: 1, exp: "현무암은 마그마가 지표 근처에서 식어 만들어지며, 색이 어둡고 구멍이 뚫려 있기도 합니다." },
+            { q: "땅속 깊은 곳에서 마그마가 천천히 식어 만들어져, 알갱이 크기가 크고 색깔이 밝은 암석은?", opts: ["현무암", "진흙", "화강암", "모래"], a: 2, exp: "화강암은 땅속 깊은 곳에서 마그마가 식어 만들어지며, 밝은 색을 띠고 알갱이 크기가 큽니다." },
+            { q: "현무암에 구멍이 뚫려 있는 이유는 마그마가 식으면서 무엇이 빠져나갔기 때문일까요?", opts: ["가스", "물", "화산재", "공기"], a: 0, exp: "현무암은 마그마가 식는 과정에서 가스가 빠져나가면서 구멍이 생기기도 합니다." },
+            { q: "화산재는 하늘 높이 올라가 비행기의 운항을 어렵게 하기도 한다.", opts: ["O", "X"], a: 0, exp: "화산재는 시야를 가리고 비행기 엔진에 들어가 비행을 방해할 수 있습니다." },
+            { q: "화산 활동으로 흐르는 용암은 산불을 일으킬 수 있다.", opts: ["O", "X"], a: 0, exp: "뜨거운 용암이 지표면을 흐르면서 나무에 불을 붙여 산불이 나기도 합니다." },
+            { q: "화산 가스는 사람들의 호흡을 돕고 건강하게 해준다.", opts: ["O", "X"], a: 1, exp: "화산 가스는 사람들의 호흡을 어렵게 하고 건강에 해로울 수 있습니다." },
+            { q: "화산재가 쌓인 땅은 식물이 자랄 수 없는 죽은 땅이 된다.", opts: ["O", "X"], a: 1, exp: "시간이 지나면 화산재는 오히려 땅을 비옥하게 만들어 농작물이 잘 자라게 돕습니다." },
+            { q: "화산 주변 땅속의 뜨거운 열을 이용해 지열 발전을 할 수 있다.", opts: ["O", "X"], a: 0, exp: "화산 주변 땅속의 뜨거운 열을 전기로 바꾸는 지열 발전이 가능합니다." },
+            { q: "화산 활동으로 만들어진 독특한 지형은 사람들이 많이 찾는 관광지가 될 수 있다.", opts: ["O", "X"], a: 0, exp: "주상절리나 온천, 분화구 호수 등은 훌륭한 관광 자원이 됩니다." },
+            { q: "땅속의 마그마가 지표로 뿜어져 나와서 만들어진 산을 무엇이라고 부를까요?", opts: ["지진", "화산", "빙하", "계곡"], a: 1, exp: "마그마가 지표로 분출하여 쌓이면서 화산이 만들어집니다." },
+            { q: "화산 분출물 중에서 크고 작은 돌덩어리로 이루어진 고체 물질은 무엇일까요?", opts: ["화산 가스", "용암", "화산재", "화산 암석 조각"], a: 3, exp: "화산 암석 조각은 화산이 폭발할 때 뿜어져 나오는 크고 작은 돌덩어리입니다." },
+            { q: "현무암과 화강암 중에서 우리나라의 제주도나 울릉도에서 흔하게 볼 수 있는 암석은 무엇일까요?", opts: ["현무암", "화강암", "대리암", "사암"], a: 0, exp: "제주도와 울릉도는 화산 활동으로 만들어진 섬이라 현무암을 흔히 볼 수 있습니다." },
+            { q: "화강암을 이루고 있는 알갱이들은 눈으로 구별할 수 있을 정도로 크다.", opts: ["O", "X"], a: 0, exp: "화강암은 땅속 깊은 곳에서 마그마가 아주 천천히 식기 때문에 알갱이가 커집니다." },
+            { q: "현무암과 화강암 중에서 색깔이 더 밝은 암석은 무엇일까요?", opts: ["현무암", "화강암"], a: 1, exp: "화강암은 밝은 색을 띠는 알갱이들이 많이 포함되어 있어 전체적으로 밝습니다." },
+            { q: "현무암은 마그마가 주로 어디에서 식어서 만들어진 암석일까요?", opts: ["지표면 근처", "땅속 아주 깊은 곳"], a: 0, exp: "현무암은 지표면 근처에서 마그마가 매우 빠르게 식으면서 만들어집니다." },
+            { q: "화산 폭발 시 뿜어져 나온 많은 양의 화산재는 햇빛을 가려 지구의 기온을 일시적으로 낮추기도 한다.", opts: ["O", "X"], a: 0, exp: "거대한 화산 폭발로 생긴 화산재 구름은 햇빛을 차단하여 기온을 낮출 수 있습니다." },
+            { q: "화산 활동으로 생긴 지형 중 따뜻한 물이 솟아나와 사람들이 목욕이나 휴식을 취할 수 있는 곳은?", opts: ["폭포", "빙하", "온천", "호수"], a: 2, exp: "땅속 마그마의 열기로 지하수가 데워져 솟아나는 곳을 온천이라고 합니다." },
+            { q: "화산 활동이 강하게 일어나면 산사태나 홍수가 발생할 수도 있다.", opts: ["O", "X"], a: 0, exp: "화산 꼭대기의 얼음이 녹아내리거나, 화산재가 비와 섞여 흘러내리면서 홍수나 산사태가 날 수 있습니다." },
+            { q: "화산 폭발 시 마을과 숲을 덮쳐 큰 불을 내거나 피해를 입힐 수 있는 뜨거운 액체 물질은?", opts: ["용암", "화산재", "지하수", "화산 암석 조각"], a: 0, exp: "뜨거운 용암은 매우 천천히 흐르더라도 지나는 길의 모든 것을 불태울 수 있습니다." }
+        ];
+
+        function countB(type) { return placedBuildings.filter(b => b.key === type).length; }
+
+        function updateUI() {
+            Object.keys(inventory).forEach(k => {
+                const el = document.getElementById(`inv-${k}`);
+                if(el) el.innerText = inventory[k];
+            });
+            renderQuests();
+        }
+
+        function showAlert(msg, type = 'info') {
+            const al = document.getElementById('alert-text');
+            al.innerHTML = msg;
+            
+            // 기존 테마 클래스 초기화
+            al.classList.remove('success', 'error', 'info');
+            al.classList.add(type);
+            
+            al.style.opacity = 1;
+            setTimeout(() => { al.style.opacity = 0; }, 2500);
+        }
+
+        function renderShop() {
+            const container = document.getElementById('shop-items');
+            container.innerHTML = '';
+            for (let key in items) {
+                const it = items[key];
+                let costHtml = '';
+                for (let c in it.cost) costHtml += `<span><img src="${c}_processed.webp">${it.cost[c]}</span>`;
+                let iconHtml = it.img ? `<img src="${it.img}">` : it.emoji;
+                
+                container.innerHTML += `
+                    <div class="shop-item" onclick="buyBuilding('${key}', event)">
+                        <div class="icon-box">${iconHtml}</div>
+                        <div class="info">
+                            <div class="name">${it.name}</div>
+                            <div class="desc">${it.desc || ''}</div>
+                            <div class="cost">${costHtml}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleShop() {
+            const shop = document.getElementById('shop');
+            const btn = document.getElementById('shop-toggle-btn');
+            if (shop.style.display === 'none' || shop.style.display === '') {
+                shop.style.display = 'block';
+                btn.innerText = '❌ 상점 닫기';
+            } else {
+                shop.style.display = 'none';
+                btn.innerText = '🛒 상점 열기';
+            }
+        }
+        
+        function toggleQuest() {
+            const panel = document.getElementById('quest-panel');
+            const btn = document.getElementById('quest-toggle-btn');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'block';
+                btn.innerText = '❌ 퀘스트 닫기';
+            } else {
+                panel.style.display = 'none';
+                btn.innerText = '📜 퀘스트 열기';
+            }
+        }
+        
+        function showResInfo(type, title, desc) {
+            const modal = document.getElementById('res-info-modal');
+            let iconHtml = type === 'gas' || type === 'lava' || type === 'ash' || type === 'rock' ? 
+                           `<img src="${type}_processed.webp" style="width:50px;height:50px;">` : '❓';
+            document.getElementById('res-info-icon').innerHTML = iconHtml;
+            document.getElementById('res-info-title').innerText = title;
+            document.getElementById('res-info-desc').innerText = desc;
+            modal.style.display = 'flex';
+        }
+
+        let lastShownQuestId = null;
+        let firstQuestDelayPassed = false;
+        
+        setTimeout(() => {
+            firstQuestDelayPassed = true;
+            updateUI();
+        }, 15000);
+
+        function renderQuests() {
+            const container = document.getElementById('quest-items');
+            container.innerHTML = '';
+            
+            if (!firstQuestDelayPassed) {
+                container.innerHTML = '<div style="color: #888; font-size: 14px; text-align: center; padding: 10px; line-height: 1.5;">자유롭게 마을을 꾸며보세요!<br>잠시 후 첫 퀘스트가 주어집니다.</div>';
+                return;
+            }
+            
+            let activeQuest = quests.find(q => !q.done);
+            
+            const completeModal = document.getElementById('quest-complete-modal');
+            if (completeModal && completeModal.style.display === 'flex') {
+                // Do nothing if complete modal is showing
+            } else {
+                if (activeQuest && activeQuest.condition()) {
+                    activeQuest.done = true;
+                    let rewardText = `🎉 퀘스트를 완료하였습니다!`;
+                    if(activeQuest.medal) {
+                        rewardText += `<br>${activeQuest.medal} 훈장 획득!`;
+                        // document.getElementById('medals-container').innerHTML += activeQuest.medal;
+                    }
+                    
+                    document.getElementById('quest-complete-title').innerText = activeQuest.title;
+                    document.getElementById('quest-complete-desc').innerHTML = rewardText;
+                    completeModal.style.display = 'flex';
+                } else if (activeQuest && activeQuest.id !== lastShownQuestId) {
+                    lastShownQuestId = activeQuest.id;
+                    document.getElementById('quest-alert-title').innerText = activeQuest.title;
+                    document.getElementById('quest-alert-desc').innerText = activeQuest.desc;
+                    document.getElementById('quest-alert-modal').style.display = 'flex';
+                }
+            }
+
+            quests.forEach(q => {
+                if (q.done) {
+                    container.innerHTML += `
+                        <div class="quest-item done">
+                            <div class="quest-title">${q.title}</div>
+                            ✅ 완료
+                        </div>
+                    `;
+                } else if (q === activeQuest) {
+                    container.innerHTML += `
+                        <div class="quest-item">
+                            <div class="quest-title">${q.title}</div>
+                            🔲 ${q.desc}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function updateYSorting(el) {
+            if (el.dataset.group === 'tile') {
+                el.style.zIndex = 5;
+            } else {
+                const rect = el.getBoundingClientRect();
+                el.style.zIndex = el.offsetTop + el.offsetHeight;
+            }
+        }
+
+        function isCollidingLocal(el1, el2) {
+            const r1 = { left: el1.offsetLeft, top: el1.offsetTop, right: el1.offsetLeft + el1.offsetWidth, bottom: el1.offsetTop + el1.offsetHeight };
+            const r2 = { left: el2.offsetLeft, top: el2.offsetTop, right: el2.offsetLeft + el2.offsetWidth, bottom: el2.offsetTop + el2.offsetHeight };
+            return !(r1.right <= r2.left || r1.left >= r2.right || r1.bottom <= r2.top || r1.top >= r2.bottom);
+        }
+
+        function checkOverlap(el) {
+            const vol = document.getElementById('volcano');
+            if (isCollidingLocal(el, vol)) return true;
+            
+            for (let b of placedBuildings) {
+                if (b.el === el) continue;
+                if (isCollidingLocal(el, b.el)) return true;
+            }
+            
+            for (let t of touristsList) {
+                if (!t) continue;
+                if (isCollidingLocal(el, t.el)) return true;
+            }
+            
+            for (let p of puppiesList) {
+                if (!p) continue;
+                if (isCollidingLocal(el, p.el)) return true;
+            }
+            
+            return false;
+        }
+
+
+
+        function handleFarmClick(farmEl) {
+            if (farmEl.dataset.upgraded === "true") {
+                showAlert("이미 최고 단계의 비옥한 농장입니다!");
+                return;
+            }
+            if (inventory.ash >= 20) {
+                if (confirm("화산재 20개를 사용하여 '비옥한 화산재 농장'으로 업그레이드 하시겠습니까?")) {
+                    inventory.ash -= 20;
+                    farmEl.dataset.upgraded = "true";
+                    farmEl.style.background = `url('farm_upgraded_processed.webp') no-repeat center/contain`;
+                    updateUI();
+                    showAlert("✨ 농장이 비옥해졌습니다! 고구마가 더 빨리 자랍니다.");
+                }
+            } else {
+                showAlert(`업그레이드하려면 화산재가 20개 필요합니다. (현재: ${inventory.ash || 0}개)`);
+            }
+        }
+
+        setTimeout(() => updateYSorting(document.getElementById('volcano')), 100);
+
+        let isSweeping = false;
+        document.addEventListener('mousedown', () => isSweeping = true);
+        document.addEventListener('mouseup', () => isSweeping = false);
+        document.addEventListener('touchstart', () => isSweeping = true);
+        document.addEventListener('touchend', () => isSweeping = false);
+        document.addEventListener('touchcancel', () => isSweeping = false);
+
+        document.addEventListener('touchmove', (e) => {
+            if(!isSweeping) return;
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if(el) checkCollection(el);
+        }, {passive: true});
+
+        function checkCollection(el) {
+            if(!el || el.dataset.collected) return;
+
+            if(el.classList.contains('particle')) {
+                el.dataset.collected = "true";
+                inventory[el.dataset.res]++;
+                
+                // 모바일 터치 대응: 요소 제거 시 터치 스트림 끊김 현상 방지를 위해 딜레이 삭제 처리
+                el.style.left = '-9999px';
+                el.style.top = '-9999px';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                setTimeout(() => el.remove(), 1000);
+                
+                updateUI();
+            } else if(el.classList.contains('crop')) {
+                el.dataset.collected = "true";
+                inventory.potato++;
+                
+                // 모바일 터치 대응: 요소 제거 시 터치 스트림 끊김 현상 방지를 위해 딜레이 삭제 처리
+                el.style.left = '-9999px';
+                el.style.top = '-9999px';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                setTimeout(() => el.remove(), 1000);
+                
+                updateUI();
+                showAlert("🍠 고구마 수확!");
+            }
+        }
+
+        function handleOvenClick(ovenEl) {
+            if(inventory.potato >= 1 && !ovenEl.dataset.baking) {
+                inventory.potato--;
+                updateUI();
+                ovenEl.dataset.baking = "true";
+                if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'block';
+                ovenEl.style.filter = 'drop-shadow(0 0 15px #FF5722) brightness(1.2)';
+                showAlert("🔥 고구마를 굽는 중... (10초)");
+                
+                setTimeout(() => {
+                    ovenEl.dataset.baking = "";
+                    if(ovenEl.querySelector('.oven-fire')) ovenEl.querySelector('.oven-fire').style.display = 'none';
+                    ovenEl.style.filter = '';
+                    inventory.roasted++;
+                    updateUI();
+                    showAlert("<img src='roasted_potato.webp' style='width:24px; height:24px; vertical-align:middle;'> 용암 군고구마 완성!");
+                    
+                    const p = document.createElement('div');
+                    p.className = 'crop';
+                    p.innerHTML = "<img src='roasted_potato.webp' style='width:40px; height:40px; object-fit:contain;'>";
+                    p.style.left = (parseInt(ovenEl.style.left) + ovenEl.offsetWidth/2 - 20) + 'px';
+                    p.style.top = (parseInt(ovenEl.style.top) - 40) + 'px';
+                    board.appendChild(p);
+                    setTimeout(()=>p.remove(), 5000);
+                }, 10000);
+            } else if (!ovenEl.dataset.baking) {
+                showAlert("구울 고구마가 없습니다. 농장에서 수확하세요!");
+            }
+        }
+
+        let placingType = null;
+        let shadow = null;
+
+        function buyBuilding(key, event) {
+            if(event) event.stopPropagation();
+            if(placingType) return showAlert("먼저 선택한 건물을 배치해주세요!");
+
+            const item = items[key];
+            let canBuy = true;
+            for(let res in item.cost) {
+                if(inventory[res] < item.cost[res]) canBuy = false;
+            }
+
+            if(canBuy) {
+                for(let res in item.cost) inventory[res] -= item.cost[res];
+                updateUI();
+                
+                placingType = key;
+                shadow = document.createElement('div');
+                shadow.className = `building draggable obj-${item.type} size-${item.size}`;
+                shadow.dataset.key = key;
+                shadow.dataset.group = item.type;
+                
+                if (item.img) {
+                    shadow.style.background = `url('${item.img}') no-repeat center/contain`;
+                    shadow.classList.add('has-img');
+                } else {
+                    shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
+                }
+                
+                if (key === 'oven') {
+                    shadow.innerHTML += '<div class="oven-fire">🔥</div>';
+                }
+                
+                shadow.style.opacity = '0.6';
+                shadow.style.pointerEvents = 'none';
+                
+                let cx = (window.innerWidth / 2 - boardX) / zoomLevel;
+                let cy = (window.innerHeight / 2 - boardY) / zoomLevel;
+                
+                let initX = Math.round((cx - shadow.offsetWidth/2) / 30) * 30;
+                let initY = Math.round((cy - shadow.offsetHeight/2) / 30) * 30;
+                shadow.style.left = initX + 'px';
+                shadow.style.top = initY + 'px';
+                
+                board.appendChild(shadow);
+            } else {
+                showAlert("자원이 부족합니다!");
+            }
+        }
+
+        document.getElementById('viewport').addEventListener('mousemove', (e) => {
+            if(shadow) {
+                let bx = (e.clientX - boardX) / zoomLevel;
+                let by = (e.clientY - boardY) / zoomLevel;
+                let x = Math.round((bx - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((by - shadow.offsetHeight/2)/30)*30;
+                shadow.style.left = x + 'px';
+                shadow.style.top = y + 'px';
+                updateYSorting(shadow);
+            }
+        });
+
+        document.getElementById('viewport').addEventListener('click', (e) => {
+            if(e.target.closest('#shop') || e.target.closest('#inventory') || e.target.closest('.modal-bg') || e.target.closest('#volcano') || e.target.closest('#quest-panel') || e.target.closest('#shop-toggle-btn') || e.target.closest('#quest-toggle-btn')) return;
+
+            if(placingType && shadow) {
+                if (checkOverlap(shadow)) {
+                    showAlert("여기에 건설할 수 없습니다! 다른 건물과 겹칩니다.");
+                    return;
+                }
+                
+                shadow.style.opacity = '1';
+                shadow.style.pointerEvents = 'auto';
+                
+                let bx = (e.clientX - boardX) / zoomLevel;
+                let by = (e.clientY - boardY) / zoomLevel;
+                let x = Math.round((bx - shadow.offsetWidth/2)/30)*30;
+                let y = Math.round((by - shadow.offsetHeight/2)/30)*30;
+                shadow.style.left = x + 'px';
+                shadow.style.top = y + 'px';
+                updateYSorting(shadow);
+                
+                const key = placingType;
+                const el = shadow;
+                el.addEventListener('click', (ev) => {
+                    if(isPanning) return;
+                    openBuildingModal(el, key);
+                });
+                
+                placedBuildings.push({ key: key, el: shadow, timer: 0 });
+
+                shadow = null;
+                placingType = null;
+                showAlert("건설 완료!");
+                updateUI(); 
+            }
+        });
+
+        let draggingEl = null, startX, startY, initX, initY;
+        function dragStart(e, b) {
+            draggingEl = b;
+            draggingEl.style.zIndex = 30000;
+            if(e.type.includes('touch')) {
+                startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX; startY = e.clientY;
+            }
+            initX = parseInt(b.style.left||0); initY = parseInt(b.style.top||0);
+            e.stopPropagation();
+        }
+        
+        window.addEventListener('mousemove', (e) => {
+            if(!draggingEl) return;
+            let dx = (e.clientX - startX) / zoomLevel; let dy = (e.clientY - startY) / zoomLevel;
+            draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
+            draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
+        });
+        window.addEventListener('mouseup', () => {
+            if(draggingEl) { 
+                if (checkOverlap(draggingEl)) {
+                    showAlert("건물이 겹칩니다! 원래 자리로 되돌아갑니다.");
+                    draggingEl.style.left = initX + 'px';
+                    draggingEl.style.top = initY + 'px';
+                }
+                updateYSorting(draggingEl); 
+                draggingEl = null; 
+            }
+        });
+        
+        window.addEventListener('touchmove', (e) => {
+            if(!draggingEl) return;
+            let dx = (e.touches[0].clientX - startX) / zoomLevel; let dy = (e.touches[0].clientY - startY) / zoomLevel;
+            draggingEl.style.left = (Math.round((initX + dx)/30)*30) + 'px';
+            draggingEl.style.top = (Math.round((initY + dy)/30)*30) + 'px';
+        }, {passive:false});
+        window.addEventListener('touchend', () => {
+            if(draggingEl) { 
+                if (checkOverlap(draggingEl)) {
+                    showAlert("건물이 겹칩니다! 원래 자리로 되돌아갑니다.");
+                    draggingEl.style.left = initX + 'px';
+                    draggingEl.style.top = initY + 'px';
+                }
+                updateYSorting(draggingEl); 
+                draggingEl = null; 
+            }
+        });
+
+        function createParticle(type, startX, startY) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.dataset.res = type;
+            p.style.background = `url('${type}_processed.webp') no-repeat center/contain`;
+            p.style.left = startX + 'px'; p.style.top = startY + 'px';
+            board.appendChild(p);
+            
+            const powers = placedBuildings.filter(b => b.key === 'power');
+            if(powers.length > 0 && Math.random() > 0.4) {
+                const target = powers[0].el;
+                const tx = parseInt(target.style.left) + 75;
+                const ty = parseInt(target.style.top) + 75;
+                setTimeout(() => {
+                    p.style.left = tx + 'px'; p.style.top = ty + 'px';
+                    p.style.transform = 'scale(0.2)';
+                    setTimeout(() => {
+                        inventory[type]++; updateUI(); p.remove();
+                    }, 1000);
+                }, 50);
+                return;
+            }
+
+            setTimeout(() => {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 50 + Math.random() * 250; 
+                p.style.left = (startX + Math.cos(angle)*dist) + 'px';
+                p.style.top = (startY + Math.sin(angle)*dist) + 'px';
+            }, 50);
+
+            p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
+            p.addEventListener('mousedown', () => checkCollection(p));
+            p.addEventListener('touchstart', (e) => { 
+                isSweeping = true;
+                e.preventDefault(); 
+                checkCollection(p); 
+            }, {passive: false});
+            setTimeout(() => { if(p.parentNode && !p.dataset.collected) p.remove(); }, 15000);
+        }
+
+        
+        let currentBuildingEl = null;
+        let currentBuildingKey = null;
+
+        function closeBuildingModal() {
+            document.getElementById('building-modal').style.display = 'none';
+            currentBuildingEl = null;
+            currentBuildingKey = null;
+        }
+
+        function openBuildingModal(el, key) {
+            currentBuildingEl = el;
+            currentBuildingKey = key;
+            const item = items[key];
+            const bData = placedBuildings.find(b => b.el === el);
+            
+            document.getElementById('bm-icon').innerHTML = item.img ? `<img src="${item.img}" style="width:120px;height:120px;object-fit:contain;">` : `<span style="font-size:110px;line-height:1.2;">${item.emoji}</span>`;
+            document.getElementById('bm-title').innerText = item.name + (bData.upgraded ? " (업그레이드됨)" : "");
+            document.getElementById('bm-desc').innerText = item.desc;
+            
+            const customUI = document.getElementById('bm-custom-ui');
+            let extraDesc = "";
+            if (key === 'wall') extraDesc = `📌 <b>관광 안내판 (패시브)</b><br>관광객이 찾아올 확률을 조금 높여줍니다.`;
+            else if (key === 'bomb') extraDesc = `📌 <b>자원 분쇄기 (수동)</b><br>버튼을 눌러 암석 1개를 화산재 3개로 분쇄합니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('bomb')">🔨 암석 분쇄</button>`;
+            else if (key === 'pillar') extraDesc = `📌 <b>지질학 연구 (패시브)</b><br>30초마다 무작위 자원을 1개씩 자동 생산합니다.`;
+            else if (key === 'hot') extraDesc = `📌 <b>관광객 팁 (패시브)</b><br>이 온천을 구경하고 가는 관광객이 '암석'을 바닥에 남깁니다.`;
+            else if (key === 'harubang') extraDesc = `📌 <b>기념품 판매 (수동)</b><br>관광객에게 화산재 5개를 팔고 귀한 고구마 1개로 교환합니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('harubang')">🎁 기념품 판매</button>`;
+            else if (key === 'pond') extraDesc = `📌 <b>수분 공급 (수동)</b><br>10초 동안 주변에 화산 가스를 집중적으로 스폰시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('pond')">💧 가스 스폰 시작</button>`;
+            else if (key === 'oven') extraDesc = `📌 <b>군고구마 굽기 (수동)</b><br>고구마 1개를 뜨거운 열기로 10초간 구워 군고구마를 만듭니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('oven')" ${bData.baking ? 'disabled' : ''}>🔥 고구마 굽기</button>`;
+            else if (key === 'sand') extraDesc = `📌 <b>조개 줍기 (패시브)</b><br>20초마다 해변 주변에 조개 대신 무작위 자원이 스폰됩니다.`;
+            else if (key === 'castle') extraDesc = `📌 <b>강아지 기사단 (수동)</b><br>맛있는 군고구마를 사용하여 지나가는 일반 강아지(🐶)를 유인해 ⚔️ 투구를 쓴 기사로 진화시킵니다!<br><br><button class="building-action-btn" onclick="triggerBuildingAction('castle_feed')"><img src='roasted_potato.webp' style='width:16px; height:16px; vertical-align:middle;'> 군고구마 1개 사용</button>`;
+            else if (key === 'crater') extraDesc = `📌 <b>신비한 작용 (수동)</b><br>용암을 소비해 자원을 폭발시키거나 고구마를 황금으로 진화시킵니다.<br><br><button class="building-action-btn" onclick="triggerBuildingAction('crater_fuse')" style="background:#9C27B0; margin-bottom:8px;">🌊 풍요의 호수 폭발 (용암 10)</button><button class="building-action-btn" onclick="triggerBuildingAction('crater_gold')" style="background:#E6C229; color:black;">✨ 황금 고구마 진화 (고구마 1)</button>`;
+            else if (key === 'farm') {
+                extraDesc = `📌 <b>고구마 농사 (패시브)</b><br>시간이 지날 때마다 자동으로 고구마를 수확합니다.`;
+                if(!bData.upgraded) extraDesc += `<br><br><button class="building-action-btn" onclick="triggerBuildingAction('farm_upgrade')" style="background:#E6C229; color:black;">⭐ 초비옥 농장 업그레이드 (화산재 20)</button>`;
+                else extraDesc += `<br><br><div style="font-size:13px; color:#4CAF50; font-weight:bold;">✨ 업그레이드 완료: 생산속도 2배!</div>`;
+            }
+            else if (key === 'power') extraDesc = `📌 <b>자원 흡수 (패시브)</b><br>가끔씩 맵에 떨어진 자원을 발전소 쪽으로 강하게 끌어당깁니다.`;
+            
+            customUI.innerHTML = extraDesc ? `<div style="background:#f9f9f9; padding:12px; border-radius:8px; border:1px solid #ddd; text-align:left; font-size:13.5px; line-height:1.4; color:#333;">${extraDesc}</div>` : '';
+
+
+            document.getElementById('building-modal').style.display = 'flex';
+        }
+
+        function triggerBuildingAction(action) {
+            const el = currentBuildingEl;
+            const bData = placedBuildings.find(b => b.el === el);
+            if(!bData) return;
+            
+            if (action === 'bomb') {
+                if (inventory.rock >= 1) {
+                    inventory.rock -= 1; inventory.ash += 3; updateUI();
+                    showAlert("🔨 암석을 부숴 화산재 3개를 얻었습니다!");
+                } else showAlert("암석이 부족합니다!");
+            } else if (action === 'harubang') {
+                if (inventory.ash >= 5) {
+                    inventory.ash -= 5; inventory.potato += 1; updateUI();
+                    showAlert("🎁 관광객에게 기념품을 팔고 고구마를 얻었습니다!");
+                } else showAlert("화산재가 부족합니다!");
+            } else if (action === 'pond') {
+                showAlert("💧 10초간 화산 가스가 스폰됩니다.");
+                let count = 0;
+                let intv = setInterval(() => {
+                    if(!document.body.contains(el)) return clearInterval(intv);
+                    createParticle('gas', parseInt(el.style.left)+30, parseInt(el.style.top)+30);
+                    count++;
+                    if(count >= 10) clearInterval(intv);
+                }, 1000);
+            } else if (action === 'oven') {
+                if (inventory.potato >= 1 && !bData.baking) {
+                    inventory.potato--; updateUI();
+                    bData.baking = true;
+                    if(el.querySelector('.oven-fire')) el.querySelector('.oven-fire').style.display = 'block';
+                    el.style.filter = 'drop-shadow(0 0 15px #FF5722) brightness(1.2)';
+                    showAlert("🔥 고구마를 굽는 중... (10초)");
+                    closeBuildingModal();
+                    setTimeout(() => {
+                        if(!document.body.contains(el)) return;
+                        bData.baking = false;
+                        if(el.querySelector('.oven-fire')) el.querySelector('.oven-fire').style.display = 'none';
+                        el.style.filter = '';
+                        inventory.roasted++; updateUI();
+                        showAlert("<img src='roasted_potato.webp' style='width:24px; height:24px; vertical-align:middle;'> 용암 군고구마 완성!");
+                    }, 10000);
+                } else showAlert("구울 고구마가 없습니다!");
+            } else if (action === 'farm_upgrade') {
+                if (inventory.ash >= 20) {
+                    inventory.ash -= 20; 
+                    bData.upgraded = true; 
+                    el.dataset.upgraded = "true"; // Update DOM for quest and growth logic
+                    updateUI();
+                    el.style.background = `url('farm_upgraded_processed.webp') no-repeat center/contain`;
+                    showAlert("✨ 초비옥 농장으로 업그레이드 되었습니다!");
+                    closeBuildingModal();
+                } else showAlert("화산재 20개가 필요합니다!");
+            } else if (action === 'crater_fuse') {
+                if(inventory.lava >= 10) {
+                    inventory.lava -= 10; updateUI(); closeBuildingModal();
+                    showAlert("🌊 풍요의 호수가 폭발합니다!");
+                    for(let i=0; i<6; i++) {
+                        setTimeout(()=>createParticle(resTypes[Math.floor(Math.random()*resTypes.length)], parseInt(el.style.left)+45, parseInt(el.style.top)+45), i*200);
+                    }
+                } else showAlert("용암이 10개 필요합니다!");
+            } else if (action === 'crater_gold') {
+                if(inventory.potato >= 1 && !bData.baking) {
+                    inventory.potato--; updateUI(); bData.baking = true; closeBuildingModal();
+                    showAlert("✨ 30초 뒤 황금 물고구마가 완성됩니다!");
+                    el.style.filter = 'drop-shadow(0 0 20px #FFD700)';
+                    
+                    // 진화 중임을 보여주는 귀여운 둥둥 뜨는 반짝이 이모티콘 생성 (분화구 호수에 딱 겹쳐지게 배치)
+                    const effect = document.createElement('div');
+                    effect.className = 'crater-gold-effect';
+                    effect.innerHTML = '✨';
+                    effect.style.position = 'absolute';
+                    effect.style.top = '50%';
+                    effect.style.left = '50%';
+                    effect.style.transform = 'translate(-50%, -50%)';
+                    effect.style.fontSize = '50px';
+                    effect.style.fontWeight = '900';
+                    effect.style.color = '#FFD700';
+                    effect.style.textShadow = '0 0 20px rgba(255, 215, 0, 1), 0 0 10px rgba(255, 255, 255, 0.9)';
+                    effect.style.animation = 'craterGoldFloat 1.2s infinite alternate ease-in-out';
+                    effect.style.whiteSpace = 'nowrap';
+                    effect.style.zIndex = '20000';
+                    effect.style.pointerEvents = 'none';
+                    el.appendChild(effect);
+
+                    setTimeout(() => {
+                        if(!document.body.contains(el)) return;
+                        bData.baking = false; el.style.filter = '';
+                        effect.remove(); // 진화 완료 시 이펙트 삭제
+                        inventory.golden_potato++; updateUI();
+                        showAlert("✨ 황금 물고구마를 얻었습니다!", "success");
+                    }, 30000);
+                } else showAlert("고구마가 1개 필요합니다!");
+            } else if (action === 'castle_feed') {
+                if (inventory.roasted >= 1) {
+                    inventory.roasted--; updateUI(); closeBuildingModal();
+                    
+                    // 성곽 바로 아래쪽에 군고구마 스폰
+                    let cx = parseInt(el.style.left) + el.offsetWidth / 2;
+                    let cy = parseInt(el.style.top) + el.offsetHeight + 15;
+                    
+                    const p = document.createElement('div');
+                    p.className = 'crop';
+                    p.innerHTML = "<img src='roasted_potato.webp' style='width:40px; height:40px; object-fit:contain;'>";
+                    p.style.left = (cx - 20) + 'px';
+                    p.style.top = (cy - 20) + 'px';
+                    p.style.pointerEvents = 'none'; // Prevent player from picking it up
+                    board.appendChild(p);
+                    
+                    const dropData = { el: p, type: 'roasted', x: cx, y: cy };
+                    droppedItems.push(dropData);
+                    showAlert("<img src='roasted_potato.webp' style='width:24px; height:24px; vertical-align:middle;'> 성곽에서 맛있는 군고구마가 배급되었습니다! 강아지가 소환됩니다.");
+                    
+                    // 강아지 한 마리가 바닥 고구마를 쫓아가도록 스폰
+                    setTimeout(() => spawnPuppy(dropData, false), 1000);
+                } else {
+                    showAlert("배급할 용암 군고구마가 없습니다!");
+                }
+            }
+        }
+
+        function moveCurrentBuilding() {
+            if(!currentBuildingEl || !currentBuildingKey) return;
+            const el = currentBuildingEl;
+            const key = currentBuildingKey;
+            
+            // 기존 배치 목록에서 제거하여 재배치 시 자기 자신과의 겹침 충돌 방지
+            placedBuildings = placedBuildings.filter(b => b.el !== el);
+            
+            closeBuildingModal();
+            
+            placingType = key;
+            shadow = el;
+            shadow.style.opacity = '0.6';
+            shadow.style.pointerEvents = 'none';
+            
+            // 이동 즉시 마우스 포인터(화면 중앙) 근처로 건물이 달라붙게 함
+            let cx = (window.innerWidth / 2 - boardX) / zoomLevel;
+            let cy = (window.innerHeight / 2 - boardY) / zoomLevel;
+            shadow.style.left = Math.round((cx - shadow.offsetWidth/2)/30)*30 + 'px';
+            shadow.style.top = Math.round((cy - shadow.offsetHeight/2)/30)*30 + 'px';
+            updateYSorting(shadow);
+            
+            showAlert("📍 건물을 이동할 새로운 위치를 클릭하세요!");
+            updateUI();
+        }
+
+        function demolishCurrentBuilding() {
+            if(!currentBuildingEl || !currentBuildingKey) return;
+            if(confirm("정말 철거하시겠습니까? 건설 비용의 50%를 돌려받습니다.")) {
+                const item = items[currentBuildingKey];
+                for(let res in item.cost) {
+                    inventory[res] += Math.floor(item.cost[res] / 2);
+                }
+                placedBuildings = placedBuildings.filter(b => b.el !== currentBuildingEl);
+                currentBuildingEl.remove();
+                updateUI();
+                showAlert("💣 건물이 철거되었습니다.");
+                closeBuildingModal();
+            }
+        }
+
+        // 아이템 바닥에 버리기 (강아지 시스템)
+        let droppedItems = [];
+        let puppiesList = [];
+        
+
+        
+
+        function spawnDroppedItem(emoji, type) {
+            const cx = (window.innerWidth / 2 - boardX) / zoomLevel;
+            const cy = (window.innerHeight / 2 - boardY) / zoomLevel;
+            const p = document.createElement('div');
+            p.className = 'crop';
+            p.innerText = emoji;
+            p.style.left = (cx - 20) + 'px';
+            p.style.top = (cy - 20) + 'px';
+            p.style.pointerEvents = 'none'; // Prevent player from picking it up
+            board.appendChild(p);
+            
+            const dropData = { el: p, type: type, x: cx, y: cy };
+            droppedItems.push(dropData);
+            showAlert(type === 'golden' ? "✨ 전설의 향기가 퍼집니다..." : "🐶 맛있는 냄새가 퍼집니다!");
+            
+            // 강아지 스폰
+            setTimeout(() => spawnPuppy(dropData, type === 'golden'), 1000);
+        }
+        
+        function spawnPuppy(targetDrop, isGolden) {
+            const edges = [ {x: Math.random()*3000, y: -50}, {x: Math.random()*3000, y: 3050}, {x: -50, y: Math.random()*3000}, {x: 3050, y: Math.random()*3000} ];
+            const edge = edges[Math.floor(Math.random() * edges.length)];
+            
+            const p = document.createElement('div');
+            p.className = (isGolden ? 'golden-puppy-sprite' : 'puppy-sprite') + ' walk-down';
+            p.style.left = edge.x + 'px'; p.style.top = edge.y + 'px';
+            board.appendChild(p);
+            
+            puppiesList.push({ el: p, x: edge.x, y: edge.y, target: targetDrop, state: 'seeking', isKnight: false, isGolden: isGolden });
+        }
+
+        function erupt(amountMultiplier = 1) {
+            const vol = document.getElementById('volcano');
+            vol.classList.add('shake');
+            setTimeout(() => vol.classList.remove('shake'), 500);
+            
+            const startX = vol.offsetLeft;
+            const startY = vol.offsetTop;
+
+            const amount = 3 * amountMultiplier + Math.floor(Math.random() * 3 * amountMultiplier);
+            for(let i=0; i<amount; i++) {
+                createParticle(resTypes[Math.floor(Math.random() * resTypes.length)], startX, startY);
+            }
+        }
+
+        let volcanoCooldown = false;
+        let questionPool = [];
+        
+        function getNextQuestion() {
+            if (questionPool.length === 0) {
+                questionPool = [...questions];
+                for (let i = questionPool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questionPool[i], questionPool[j]] = [questionPool[j], questionPool[i]];
+                }
+            }
+            return questionPool.pop();
+        }
+
+        document.getElementById('volcano').addEventListener('click', () => {
+            if(shadow) return; 
+            if(volcanoCooldown) {
+                showAlert("🌋 에너지를 모으는 중입니다...<br><span style='font-size:18px; color:#FFE0B2;'>잠시만 기다려주세요!</span>");
+                return;
+            }
+            const modal = document.getElementById('quiz-modal');
+            const qObj = getNextQuestion();
+            currentQuiz = qObj;
+            document.getElementById('quiz-q').innerText = qObj.q;
+            const optsDiv = document.getElementById('quiz-options');
+            optsDiv.innerHTML = '';
+            
+            qObj.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option'; btn.innerText = opt;
+                btn.onclick = () => {
+                    if(idx === currentQuiz.a) {
+                        showAlert("정답! 대폭발!", "success");
+                        quizzesAnswered++; updateUI();
+                        erupt(6); 
+                    } else {
+                        showAlert("앗! 틀렸어요.<br><span style='font-size:18px; color:#FFE0B2;'>" + currentQuiz.exp + "</span>", "error");
+                    }
+                    modal.style.display = 'none';
+                    volcanoCooldown = true;
+                    const volcanoEl = document.getElementById('volcano');
+                    volcanoEl.classList.add('cooldown');
+                    setTimeout(() => { 
+                        volcanoCooldown = false; 
+                        volcanoEl.classList.remove('cooldown');
+                    }, 3000);
+                };
+                optsDiv.appendChild(btn);
+            });
+            modal.style.display = 'flex';
+        });
+
+        let touristsList = [];
+        
+        function spawnTourist() {
+            const edges = [
+                {x: Math.random()*3000, y: -50},
+                {x: Math.random()*3000, y: 3050},
+                {x: -50, y: Math.random()*3000},
+                {x: 3050, y: Math.random()*3000}
+            ];
+            const edge = edges[Math.floor(Math.random() * edges.length)];
+            
+            const types = ['tourist-sprite', 'tourist-woman-sprite', 'explorer-m-sprite', 'explorer-f-sprite', 'photographer-sprite'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const t = document.createElement('div');
+            t.className = type + ' walk-down';
+            t.dataset.type = type;
+            t.style.left = edge.x + 'px';
+            t.style.top = edge.y + 'px';
+            t.style.transition = 'left 1s linear, top 1s linear';
+            board.appendChild(t);
+            
+            
+            inventory.tourists++; updateUI();
+            
+            touristsList.push({ el: t, x: edge.x, y: edge.y, state: 'roaming', target: null, timer: 0 });
+        }
+        
+        function getEmotionFor(key) {
+            if (key === 'hot') return '♨️';
+            if (key === 'farm' || key === 'oven') return '🤤';
+            if (key === 'harubang' || key === 'castle') return '📸';
+            return '👍';
+        }
+        
+        
+        function updateSpriteDirection(el, dx, dy, isMoving) {
+            el.classList.remove('walk-down', 'walk-up', 'walk-left', 'walk-right', 'idle');
+            if (!isMoving) {
+                el.classList.add('idle');
+                return;
+            }
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) el.classList.add('walk-right');
+                else el.classList.add('walk-left');
+            } else {
+                if (dy > 0) el.classList.add('walk-down');
+                else el.classList.add('walk-up');
+            }
+        }
+
+        function showEmotion(x, y, emoji) {
+            const e = document.createElement('div');
+            e.className = 'emotion';
+            e.innerText = emoji;
+            e.style.left = (x + 10) + 'px';
+            e.style.top = (y - 30) + 'px';
+            board.appendChild(e);
+            setTimeout(() => e.remove(), 2000);
+        }
+
+        setInterval(() => {
+            dayTick++;
+
+            const maxTourists = 10;
+            if (touristsList.length < maxTourists && Math.random() < 0.05) {
+                spawnTourist();
+            }
+
+            placedBuildings.forEach(b => {
+                b.timer++;
+                let threshold = b.el.dataset.upgraded === "true" ? 15 : 30;
+                if(b.key === 'farm' && b.timer >= threshold) {
+                    b.timer = 0;
+                    const p = document.createElement('div');
+                    p.className = 'crop'; p.innerText = '🍠';
+                    p.style.left = (parseInt(b.el.style.left) + 30 + Math.random()*30) + 'px';
+                    p.style.top = (parseInt(b.el.style.top) + Math.random()*30) + 'px';
+                    p.addEventListener('mousedown', () => checkCollection(p));
+                    p.addEventListener('mouseover', () => { if(isSweeping) checkCollection(p); });
+                    p.addEventListener('touchstart', (e) => {
+                        isSweeping = true;
+                        e.preventDefault();
+                        checkCollection(p);
+                    }, {passive: false});
+                    board.appendChild(p);
+                }
+            });
+
+            
+            // 추가 건물 패시브 로직
+            placedBuildings.forEach(b => {
+                if(b.key === 'pillar' && dayTick % 30 === 0) {
+                    createParticle(resTypes[Math.floor(Math.random()*resTypes.length)], parseInt(b.el.style.left)+15, parseInt(b.el.style.top)+15);
+                }
+                if(b.key === 'beach' && dayTick % 20 === 0) {
+                    createParticle(resTypes[Math.floor(Math.random()*resTypes.length)], parseInt(b.el.style.left)+30, parseInt(b.el.style.top)+30);
+                }
+            });
+
+            // 강아지 이동 루직 (0.5초마다 갱신하기 위해 setInterval 분리하는게 좋지만, 여기서는 좌표 이동 계산)
+
+            if(dayTick % 10 === 0) erupt(1);
+
+        }, 1000);
+
+        function willCollide(x, y, w, h, ignoreEl) {
+            const r1 = { left: x, top: y, right: x + w, bottom: y + h };
+            const vol = document.getElementById('volcano');
+            if (vol !== ignoreEl) {
+                // Volcano visual width/height might differ, but offsetWidth is 150.
+                // Note that volcano uses transform: translate(-50%, -50%) which shifts its visual bounding box!
+                // Its offsetLeft is the center. So its bounding box is left - 75 to left + 75.
+                const vx = vol.offsetLeft - 75;
+                const vy = vol.offsetTop - 75;
+                const r2 = { left: vx, top: vy, right: vx + 150, bottom: vy + 150 };
+                if (!(r1.right <= r2.left || r1.left >= r2.right || r1.bottom <= r2.top || r1.top >= r2.bottom)) return true;
+            }
+            for (let b of placedBuildings) {
+                if (b.el === ignoreEl) continue;
+                // Buildings don't use translate(-50%, -50%), they are positioned from top-left.
+                const r2 = { left: b.el.offsetLeft, top: b.el.offsetTop, right: b.el.offsetLeft + b.el.offsetWidth, bottom: b.el.offsetTop + b.el.offsetHeight };
+                if (!(r1.right <= r2.left || r1.left >= r2.right || r1.bottom <= r2.top || r1.top >= r2.bottom)) return true;
+            }
+            return false;
+        }
+
+        function getSafeDestination(startX, startY, endX, endY, w, h, ignoreEl) {
+            let dx = endX - startX;
+            let dy = endY - startY;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist === 0) return {x: startX, y: startY, collided: false};
+            
+            let step = 10;
+            let steps = Math.max(1, Math.floor(dist / step));
+            let safeX = startX;
+            let safeY = startY;
+            
+            for (let i = 1; i <= steps; i++) {
+                let testX = startX + (dx * i / steps);
+                let testY = startY + (dy * i / steps);
+                if (willCollide(testX, testY, w, h, ignoreEl)) {
+                    return {x: safeX, y: safeY, collided: true};
+                }
+                safeX = testX;
+                safeY = testY;
+            }
+            
+            if (willCollide(endX, endY, w, h, ignoreEl)) {
+                return {x: safeX, y: safeY, collided: true};
+            }
+            return {x: endX, y: endY, collided: false};
+        }
+
+        setInterval(() => {
+            touristsList.forEach((t, i) => {
+                if (!t) return;
+                
+                let oldX = t.x, oldY = t.y;
+
+                if (t.state === 'roaming') {
+                    if (placedBuildings.length > 0 && Math.random() < 0.5) {
+                        t.target = placedBuildings[Math.floor(Math.random() * placedBuildings.length)];
+                        t.state = 'moving';
+                    } else {
+                        let rndX = (Math.random()-0.5)*300; let rndY = (Math.random()-0.5)*300;
+                        t.x += rndX;
+                        t.y += rndY;
+                        updateSpriteDirection(t.el, rndX, rndY, true);
+                        if (t.el.dataset.type === 'photographer-sprite' && Math.random() < 0.3) {
+                            showEmotion(t.x, t.y, '📸');
+                        }
+                    }
+                } else if (t.state === 'moving') {
+                    if (t.target && t.target.el.parentNode) {
+                        const tx = parseInt(t.target.el.style.left) + t.target.el.offsetWidth/2;
+                        const ty = parseInt(t.target.el.style.top) + t.target.el.offsetHeight/2;
+                        
+                        const dx = tx - t.x;
+                        const dy = ty - t.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        
+                        if (dist < 80) {
+                            t.state = 'enjoying';
+                            t.timer = 5; 
+                            t.el.style.transition = 'none';
+                            updateSpriteDirection(t.el, 0, 0, false);
+                        } else {
+                            const speed = 100; 
+                            const ratio = Math.min(1, speed / dist);
+                            let moveX = dx * ratio; let moveY = dy * ratio;
+                            t.x += moveX;
+                            t.y += moveY;
+                            updateSpriteDirection(t.el, moveX, moveY, true);
+                        }
+                    } else {
+                        t.state = 'roaming';
+                    }
+                } else if (t.state === 'enjoying') {
+                    t.timer--;
+                    if (t.timer % 2 === 0) {
+                        showEmotion(t.x, t.y, getEmotionFor(t.target.key));
+                    }
+                    if (t.timer <= 0) {
+                        t.el.style.transition = 'left 1s linear, top 1s linear';
+                        if (Math.random() < 0.4) {
+                            t.state = 'leaving';
+                        } else {
+                            t.state = 'roaming'; 
+                        }
+                    }
+                } else if (t.state === 'leaving') {
+                    let lx = (t.x < 1500 ? -300 : 300);
+                    let ly = (t.y < 1500 ? -300 : 300);
+                    t.x += lx;
+                    t.y += ly;
+                    updateSpriteDirection(t.el, lx, ly, true);
+                    if (t.x < -200 || t.x > 3200 || t.y < -200 || t.y > 3200) {
+                        t.el.remove();
+                        touristsList[i] = null;
+                    }
+                }
+                
+                t.x = Math.max(0, Math.min(3000, t.x));
+                t.y = Math.max(0, Math.min(3000, t.y));
+                
+                let targetEl = t.target ? t.target.el : null;
+                if (t.state !== 'leaving') {
+                    let safe = getSafeDestination(oldX, oldY, t.x, t.y, 32, 32, targetEl);
+                    t.x = safe.x;
+                    t.y = safe.y;
+                    if (safe.collided && t.state !== 'roaming') t.state = 'roaming';
+                }
+                
+                if (touristsList[i]) {
+                    t.el.style.left = t.x + 'px';
+                    t.el.style.top = t.y + 'px';
+                }
+            });
+            touristsList = touristsList.filter(t => t !== null);
+        }, 1000);
+
+        setInterval(() => {
+            puppiesList.forEach((pup, i) => {
+                if(!pup) return;
+                
+                let speed = pup.isGolden ? 80 : 50;
+                if(pup.isKnight) speed = 90;
+                
+                let oldX = pup.x, oldY = pup.y;
+                
+                if (pup.state === 'seeking') {
+                    if(pup.target && pup.target.el.parentNode) {
+                        let dx = pup.target.x - pup.x; let dy = pup.target.y - pup.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 40) {
+                            // 고구마를 다가가 먹는 즉시 ⚔️ 기사 강아지로 멋지게 진화!
+                            pup.isKnight = true;
+                            pup.el.classList.add('puppy-knight');
+                            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+                            showEmotion(pup.x, pup.y, '⚔️');
+                            showAlert("⚔️ 강아지가 성곽 군고구마를 먹고 용맹한 기사 강아지가 되었습니다!", "success");
+                            updateUI();
+
+                            pup.state = 'eating'; pup.timer = 4;
+                            pup.target.el.remove();
+                            droppedItems = droppedItems.filter(d => d !== pup.target);
+                            updateSpriteDirection(pup.el, 0, 0, false);
+                        } else {
+                            let mx = dx * (speed/dist); let my = dy * (speed/dist);
+                            pup.x += mx; pup.y += my;
+                            updateSpriteDirection(pup.el, mx, my, true);
+                        }
+                    } else {
+                        pup.state = 'roaming';
+                    }
+                } else if (pup.state === 'eating') {
+                    pup.timer--;
+                    if(pup.timer <= 0) {
+                        showEmotion(pup.x, pup.y, '💖');
+                        if(pup.isGolden) {
+                            showAlert("✨ 황금 강아지가 엄청난 보상을 남겼습니다!");
+                            erupt(15); 
+                            pup.state = 'leaving';
+                        } else {
+                            pup.state = 'roaming';
+                        }
+                    }
+                } else if (pup.state === 'roaming') {
+                    if(pup.isKnight) {
+                        // 1순위: 바닥에 방치된 고구마가 있으면 주우러 감
+                        if(droppedItems.length > 0) {
+                            pup.target = droppedItems[0];
+                            pup.state = 'fetching_potato';
+                        } else {
+                            // 2순위: 원래대로 화산 자원 조각 수집
+                            const particles = Array.from(document.querySelectorAll('.particle'));
+                            if(particles.length > 0) {
+                                const targetP = particles[Math.floor(Math.random() * particles.length)];
+                                pup.targetEl = targetP;
+                                pup.state = 'fetching';
+                            } else {
+                                let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
+                                pup.x += rx; pup.y += ry;
+                                updateSpriteDirection(pup.el, rx, ry, true);
+                            }
+                        }
+                    } else {
+                        let rx = (Math.random()-0.5)*200; let ry = (Math.random()-0.5)*200;
+                        pup.x += rx; pup.y += ry;
+                        updateSpriteDirection(pup.el, rx, ry, true);
+                    }
+                } else if (pup.state === 'going_castle') {
+                    if(pup.targetEl && pup.targetEl.parentNode) {
+                        let tx = parseInt(pup.targetEl.style.left)+45; let ty = parseInt(pup.targetEl.style.top)+45;
+                        let dx = tx - pup.x; let dy = ty - pup.y; let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 50) {
+                            // 기사로 변신할 때 쫓고 있던 군고구마가 바닥에 있으면 성곽 훈련 식량으로 즉시 정리
+                            if(pup.target && pup.target.el && pup.target.el.parentNode) {
+                                pup.target.el.remove();
+                                droppedItems = droppedItems.filter(d => d !== pup.target);
+                            }
+                            pup.target = null;
+                            
+                            pup.isKnight = true; pup.el.classList.add('puppy-knight');
+                            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+                            showEmotion(pup.x, pup.y, '⚔️'); pup.state = 'roaming';
+                            updateUI();
+                            updateSpriteDirection(pup.el, 0, 0, false);
+                        } else {
+                            let mx = dx * (speed/dist); let my = dy * (speed/dist);
+                            pup.x += mx; pup.y += my;
+                            updateSpriteDirection(pup.el, mx, my, true);
+                        }
+                    } else pup.state = 'roaming';
+                } else if (pup.state === 'fetching') {
+                    if(pup.targetEl && pup.targetEl.parentNode) {
+                        let tx = parseInt(pup.targetEl.style.left); let ty = parseInt(pup.targetEl.style.top);
+                        let dx = tx - pup.x; let dy = ty - pup.y; let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 50) {
+                            inventory[pup.targetEl.dataset.res]++; updateUI();
+                            pup.targetEl.remove();
+                            showEmotion(pup.x, pup.y, '🦴');
+                            pup.state = 'roaming';
+                            updateSpriteDirection(pup.el, 0, 0, false);
+                        } else {
+                            let mx = dx * (speed/dist); let my = dy * (speed/dist);
+                            pup.x += mx; pup.y += my;
+                            updateSpriteDirection(pup.el, mx, my, true);
+                        }
+                    } else pup.state = 'roaming';
+                } else if (pup.state === 'fetching_potato') {
+                    if(pup.target && pup.target.el && pup.target.el.parentNode) {
+                        let dx = pup.target.x - pup.x; let dy = pup.target.y - pup.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 50) {
+                            if(pup.target.type === 'roasted') {
+                                inventory.roasted++;
+                                showAlert("⚔️ 기사 강아지가 방치된 군고구마를 주워왔습니다!", "success");
+                            } else if(pup.target.type === 'golden') {
+                                inventory.golden_potato++;
+                                showAlert("⚔️ 기사 강아지가 방치된 황금 고구마를 주워왔습니다!", "success");
+                            }
+                            updateUI();
+                            pup.target.el.remove();
+                            droppedItems = droppedItems.filter(d => d !== pup.target);
+                            showEmotion(pup.x, pup.y, '🦴');
+                            pup.target = null;
+                            pup.state = 'roaming';
+                            updateSpriteDirection(pup.el, 0, 0, false);
+                        } else {
+                            let mx = dx * (speed/dist); let my = dy * (speed/dist);
+                            pup.x += mx; pup.y += my;
+                            updateSpriteDirection(pup.el, mx, my, true);
+                        }
+                    } else {
+                        pup.target = null;
+                        pup.state = 'roaming';
+                    }
+                } else if (pup.state === 'leaving') {
+                    pup.x -= 300; pup.y -= 300;
+                    updateSpriteDirection(pup.el, -300, -300, true);
+                    if(pup.x < -200 || pup.y < -200) { pup.el.remove(); puppiesList[i] = null; }
+                }
+                
+                pup.x = Math.max(0, Math.min(3000, pup.x));
+                pup.y = Math.max(0, Math.min(3000, pup.y));
+                
+                let targetEl = pup.targetEl || (pup.target ? pup.target.el : null);
+                let pupW = pup.isGolden ? 48 : 32;
+                if (pup.state !== 'leaving') {
+                    let safe = getSafeDestination(oldX, oldY, pup.x, pup.y, pupW, pupW, targetEl);
+                    pup.x = safe.x;
+                    pup.y = safe.y;
+                    if (safe.collided && pup.state !== 'roaming') pup.state = 'roaming';
+                }
+                
+                if (puppiesList[i]) {
+                    pup.el.style.left = pup.x + 'px'; 
+                    pup.el.style.top = pup.y + 'px';
+                }
+            });
+            puppiesList = puppiesList.filter(p => p !== null);
+        }, 500);
+ 
+
+        function restoreBuilding(key, initX, initY, upgraded) {
+            const item = items[key];
+            let shadow = document.createElement('div');
+            shadow.className = `building obj-${item.type} size-${item.size}`;
+            shadow.dataset.key = key;
+            shadow.dataset.group = item.type;
+            
+            if (upgraded) {
+                shadow.dataset.upgraded = "true";
+                if (key === 'farm') {
+                    shadow.style.background = `url('farm_upgraded_processed.webp') no-repeat center/contain`;
+                }
+            } else {
+                if (item.img) {
+                    shadow.style.background = `url('${item.img}') no-repeat center/contain`;
+                    shadow.classList.add('has-img');
+                } else {
+                    shadow.innerHTML = `<span style="position:relative; z-index:2;">${item.emoji}</span>`;
+                }
+            }
+            if (key === 'oven') shadow.innerHTML += '<div class="oven-fire">🔥</div>';
+            
+            shadow.style.left = initX + 'px';
+            shadow.style.top = initY + 'px';
+            board.appendChild(shadow);
+            updateYSorting(shadow);
+            
+            shadow.addEventListener('click', (ev) => {
+                if(isPanning) return;
+                openBuildingModal(shadow, key);
+            });
+            
+            placedBuildings.push({ key: key, el: shadow, timer: 0, upgraded: !!upgraded });
+        }
+
+        function saveGame() {
+            const state = {
+                inventory: inventory,
+                quizzesAnswered: quizzesAnswered,
+                questsDone: quests.map(q => q.done),
+                firstQuestDelayPassed: firstQuestDelayPassed,
+                buildings: placedBuildings.map(b => ({
+                    key: b.key,
+                    x: parseFloat(b.el.style.left),
+                    y: parseFloat(b.el.style.top),
+                    upgraded: !!b.upgraded
+                }))
+            };
+            localStorage.setItem('volcanoTycoonSave', JSON.stringify(state));
+        }
+
+        function loadGame() {
+            const savedStr = localStorage.getItem('volcanoTycoonSave');
+            if (savedStr) {
+                try {
+                    const state = JSON.parse(savedStr);
+                    Object.assign(inventory, state.inventory);
+                    quizzesAnswered = state.quizzesAnswered || 0;
+                    if (state.questsDone) {
+                        for(let i=0; i<Math.min(quests.length, state.questsDone.length); i++) {
+                            quests[i].done = state.questsDone[i];
+                        }
+                    }
+                    if (state.firstQuestDelayPassed !== undefined) {
+                        firstQuestDelayPassed = state.firstQuestDelayPassed;
+                    }
+                    if (state.buildings) {
+                        state.buildings.forEach(b => {
+                            restoreBuilding(b.key, b.x, b.y, b.upgraded);
+                        });
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function resetGame() {
+            if (confirm("정말로 모든 데이터를 삭제하고 처음부터 다시 시작하시겠습니까?")) {
+                localStorage.removeItem('volcanoTycoonSave');
+                location.reload();
+            }
+        }
+
+        loadGame();
+        setInterval(saveGame, 5000);
+
+        renderShop();
+        updateUI();
+        function closeQuestComplete() {
+            document.getElementById('quest-complete-modal').style.display = 'none';
+            updateUI();
+        }
+
+    </script>
+</body>
+</html>
