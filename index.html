@@ -45,6 +45,8 @@
         #inventory { position: absolute; top: 15px; left: 15px; pointer-events: auto; background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 20px; display: flex; flex-wrap: nowrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 2px solid #ddd; }
         .inv-item { display: flex; align-items: center; font-size: 16px; font-weight: bold; background: #eee; padding: 4px 10px; border-radius: 10px; }
         .inv-item img, .inv-item span.icon { width: 25px; height: 25px; margin-right: 5px; font-size: 20px; line-height: 25px; display: inline-block; text-align: center; }
+        .inv-use-btn { margin-left: 6px; padding: 3px 7px; border: 2px solid #9B7400; border-radius: 7px; background: #FFD54F; color: #3E2B00; font-weight: 900; cursor: pointer; }
+        .inv-use-btn:disabled { background: #ccc; border-color: #999; color: #777; cursor: not-allowed; }
         
         #shop-toggle-btn { position: absolute; top: 15px; right: 15px; pointer-events: auto; background: #FF9800; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; border: 3px solid #E65100; box-shadow: 0 4px 0 #E65100; cursor: pointer; z-index: 20001; }
         #shop-toggle-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #E65100; }
@@ -309,6 +311,27 @@
             background-size: 192px 192px;
         }
         .puppy-knight { filter: drop-shadow(0 0 5px rgba(200,200,255,0.8)); }
+        .golden-knight { filter: drop-shadow(0 0 10px #FFD700) sepia(0.45) saturate(2.2) brightness(1.15); }
+        .puppy-level-badge {
+            position: absolute;
+            left: 50%;
+            top: -22px;
+            transform: translateX(-50%);
+            min-width: 38px;
+            padding: 2px 5px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #fff;
+            color: #222;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 13px;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.65);
+            z-index: 2;
+        }
+        .golden-knight .puppy-level-badge { background: #FFF3A6; color: #7A4E00; }
         
         @keyframes walk-normal { from { background-position-x: 0px; } to { background-position-x: -128px; } }
         @keyframes walk-golden { from { background-position-x: 0px; } to { background-position-x: -192px; } }
@@ -410,6 +433,7 @@
                 <div class="inv-item" onclick="showResInfo('rock', '화산 암석 조각', '화산 분출물 중 고체 상태입니다. 크기가 다양하며 화산탄 같은 큰 덩어리도 있습니다.')" style="cursor:help;" title="클릭하여 정보 보기"><img src="rock_processed.webp">암석 조각: <span id="inv-rock">0</span></div>
                 <div class="inv-item" title="고구마"><span class="icon">🍠</span><span id="inv-potato">0</span></div>
                 <div class="inv-item" title="용암 군고구마"><img src="roasted_potato.webp" style="width:24px; height:24px; object-fit:contain; vertical-align:middle; margin-right:5px;"><span id="inv-roasted">0</span></div>
+                <div class="inv-item" title="가장 오래된 기사 강아지를 황금 기사로 승급시킵니다."><span class="icon">✨</span>황금 고구마: <span id="inv-golden_potato">0</span><button id="use-golden-potato-btn" class="inv-use-btn" onclick="useGoldenPotato()">사용</button></div>
                 <div class="inv-item" title="누적 관광객 (훈장 조건)"><span class="icon">👦</span><span id="inv-tourists">0</span></div>
                 <button id="reset-btn" onclick="showResetModal()">🔄 다시하기</button>
             </div>
@@ -689,7 +713,8 @@
             { id: 'q16', title: '화산 가스의 힘', desc: '화산 가스 30개 보유하기', condition: () => inventory.gas >= 30, done: false, dict: '화산 가스는 화산 분출 시 나오는 기체 물질로, 수증기가 대부분을 차지하며 이산화 탄소와 이산화 황 등의 성분이 섞여 있습니다.' },
             { id: 'q17', title: '화산 자원의 조화', desc: '가스, 용암, 화산재, 암석 각각 10개 이상 보유하기', condition: () => inventory.gas >= 10 && inventory.lava >= 10 && inventory.ash >= 10 && inventory.rock >= 10, done: false, dict: '화산이 분출할 때는 기체 상태(화산 가스), 액체 상태(용암), 고체 상태(화산재, 화산 암석 조각)의 다양한 분출물들이 동시에 쏟아져 나옵니다.' },
             { id: 'q18', title: '세계적인 관광 명소', desc: '누적 관광객 15명 달성하기', condition: () => inventory.tourists >= 15, done: false, medal: '🥈', dict: '주상절리나 온천, 분화구 호수 등 화산 활동으로 형성된 지형들은 매우 아름다워 사람들이 많이 찾는 훌륭한 관광 명소가 됩니다.' },
-            { id: 'q19', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' }
+            { id: 'q19', title: '화산 타이쿤 마스터', desc: '황금 고구마 1개 진화하기', condition: () => inventory.golden_potato >= 1, done: false, medal: '🏆', dict: '분화구 호수와 텃밭을 정성껏 가꿔 신비한 황금 고구마를 손에 넣는 데 성공하여 최고 존엄의 화산 타이쿤 마스터가 되었습니다!' },
+            { id: 'q20', title: '황금 기사단의 전설', desc: '황금 기사 강아지 1마리 이상 육성하기', condition: () => puppiesList.some(p => p && p.isKnight && p.isGolden), done: false, dict: '용맹한 기사 강아지에게 신비한 황금 고구마를 먹이면 더 빠르고 많은 자원을 운반하는 전설의 황금 기사 강아지로 성장합니다.' }
         ];
 
         const questions = [
@@ -727,6 +752,8 @@
                 const el = document.getElementById(`inv-${k}`);
                 if(el) el.innerText = inventory[k];
             });
+            const goldenButton = document.getElementById('use-golden-potato-btn');
+            if(goldenButton) goldenButton.disabled = inventory.golden_potato < 1;
             renderQuests();
         }
 
@@ -1389,6 +1416,70 @@
         // 아이템 바닥에 버리기 (강아지 시스템)
         let droppedItems = [];
         let puppiesList = [];
+
+        function updatePuppyLevelBadge(pup) {
+            if(!pup || !pup.el || !pup.isKnight) return;
+            let badge = pup.el.querySelector('.puppy-level-badge');
+            if(!badge) {
+                badge = document.createElement('div');
+                badge.className = 'puppy-level-badge';
+                pup.el.appendChild(badge);
+            }
+            badge.innerText = `${pup.isGolden ? '★ ' : ''}Lv.${pup.level || 1}`;
+            badge.title = `회수 ${pup.collected || 0}개 · 다음 레벨까지 ${10 - ((pup.collected || 0) % 10)}개`;
+        }
+
+        function makePuppyKnight(pup) {
+            pup.isKnight = true;
+            pup.level = pup.level || 1;
+            pup.collected = pup.collected || 0;
+            pup.el.classList.add('puppy-knight');
+            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+            updatePuppyLevelBadge(pup);
+        }
+
+        function getPuppyCarryAmount(pup) {
+            const levelCarry = Math.max(1, pup.level || 1);
+            return pup.isGolden ? levelCarry * 2 : levelCarry;
+        }
+
+        function getPuppySpeed(pup) {
+            if(!pup.isKnight) return pup.isGolden ? 80 : 50;
+            const levelBonus = Math.max(0, (pup.level || 1) - 1) * 10;
+            return Math.min(180, (pup.isGolden ? 130 : 90) + levelBonus);
+        }
+
+        function recordPuppyCollection(pup, amount) {
+            if(!pup || !pup.isKnight) return;
+            const oldLevel = pup.level || 1;
+            pup.collected = (pup.collected || 0) + amount;
+            pup.level = 1 + Math.floor(pup.collected / 10);
+            updatePuppyLevelBadge(pup);
+            if(pup.level > oldLevel) {
+                showEmotion(pup.x, pup.y, '⭐');
+                showAlert(`⭐ 기사 강아지가 Lv.${pup.level}로 성장했습니다! 이동속도와 운반량이 증가합니다.`, "success");
+            }
+        }
+
+        function useGoldenPotato() {
+            if(inventory.golden_potato < 1) {
+                showAlert("황금 고구마가 없습니다!");
+                return;
+            }
+            const knight = puppiesList.find(pup => pup && pup.isKnight && !pup.isGolden);
+            if(!knight) {
+                showAlert("먼저 황금으로 승급할 기사 강아지를 육성하세요!");
+                return;
+            }
+
+            inventory.golden_potato--;
+            knight.isGolden = true;
+            knight.el.classList.add('golden-knight');
+            updatePuppyLevelBadge(knight);
+            updateUI();
+            showEmotion(knight.x, knight.y, '✨');
+            showAlert(`✨ 가장 오래된 기사 강아지가 황금 기사로 승급했습니다! 속도 ${getPuppySpeed(knight)}, 운반량 ${getPuppyCarryAmount(knight)}!`, "success");
+        }
         
 
         
@@ -1421,7 +1512,7 @@
             p.style.left = edge.x + 'px'; p.style.top = edge.y + 'px';
             board.appendChild(p);
             
-            puppiesList.push({ el: p, x: edge.x, y: edge.y, target: targetDrop, state: 'seeking', isKnight: false, isGolden: isGolden });
+            puppiesList.push({ el: p, x: edge.x, y: edge.y, target: targetDrop, state: 'seeking', isKnight: false, isGolden: isGolden, level: 1, collected: 0 });
         }
 
         function erupt(amountMultiplier = 1) {
@@ -1735,8 +1826,7 @@
             puppiesList.forEach((pup, i) => {
                 if(!pup) return;
                 
-                let speed = pup.isGolden ? 80 : 50;
-                if(pup.isKnight) speed = 90;
+                let speed = getPuppySpeed(pup);
                 
                 let oldX = pup.x, oldY = pup.y;
                 
@@ -1746,9 +1836,7 @@
                         let dist = Math.sqrt(dx*dx + dy*dy);
                         if(dist < 40) {
                             // 고구마를 다가가 먹는 즉시 ⚔️ 기사 강아지로 멋지게 진화!
-                            pup.isKnight = true;
-                            pup.el.classList.add('puppy-knight');
-                            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+                            makePuppyKnight(pup);
                             showEmotion(pup.x, pup.y, '⚔️');
                             showAlert("⚔️ 강아지가 성곽 군고구마를 먹고 용맹한 기사 강아지가 되었습니다!", "success");
                             updateUI();
@@ -1813,8 +1901,7 @@
                             }
                             pup.target = null;
                             
-                            pup.isKnight = true; pup.el.classList.add('puppy-knight');
-                            pup.el.style.backgroundImage = "url('knight_puppy_sprite.png')";
+                            makePuppyKnight(pup);
                             showEmotion(pup.x, pup.y, '⚔️'); pup.state = 'roaming';
                             updateUI();
                             updateSpriteDirection(pup.el, 0, 0, false);
@@ -1829,7 +1916,10 @@
                         let tx = parseInt(pup.targetEl.style.left); let ty = parseInt(pup.targetEl.style.top);
                         let dx = tx - pup.x; let dy = ty - pup.y; let dist = Math.sqrt(dx*dx + dy*dy);
                         if(dist < 50) {
-                            inventory[pup.targetEl.dataset.res]++; updateUI();
+                            const carryAmount = getPuppyCarryAmount(pup);
+                            inventory[pup.targetEl.dataset.res] += carryAmount;
+                            recordPuppyCollection(pup, carryAmount);
+                            updateUI();
                             pup.targetEl.remove();
                             showEmotion(pup.x, pup.y, '🦴');
                             pup.state = 'roaming';
@@ -1845,13 +1935,15 @@
                         let dx = pup.target.x - pup.x; let dy = pup.target.y - pup.y;
                         let dist = Math.sqrt(dx*dx + dy*dy);
                         if(dist < 50) {
+                            const carryAmount = getPuppyCarryAmount(pup);
                             if(pup.target.type === 'roasted') {
-                                inventory.roasted++;
-                                showAlert("⚔️ 기사 강아지가 방치된 군고구마를 주워왔습니다!", "success");
+                                inventory.roasted += carryAmount;
+                                showAlert(`⚔️ 기사 강아지가 방치된 군고구마를 ${carryAmount}개 주워왔습니다!`, "success");
                             } else if(pup.target.type === 'golden') {
-                                inventory.golden_potato++;
-                                showAlert("⚔️ 기사 강아지가 방치된 황금 고구마를 주워왔습니다!", "success");
+                                inventory.golden_potato += carryAmount;
+                                showAlert(`⚔️ 기사 강아지가 방치된 황금 고구마를 ${carryAmount}개 주워왔습니다!`, "success");
                             }
+                            recordPuppyCollection(pup, carryAmount);
                             updateUI();
                             pup.target.el.remove();
                             droppedItems = droppedItems.filter(d => d !== pup.target);
@@ -1878,7 +1970,7 @@
                 pup.y = Math.max(0, Math.min(3000, pup.y));
                 
                 let targetEl = pup.targetEl || (pup.target ? pup.target.el : null);
-                let pupW = pup.isGolden ? 48 : 32;
+                let pupW = pup.isGolden && !pup.isKnight ? 48 : 32;
                 if (pup.state !== 'leaving') {
                     let safe = getSafeDestination(oldX, oldY, pup.x, pup.y, pupW, pupW, targetEl);
                     pup.x = safe.x;
